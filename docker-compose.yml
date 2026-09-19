@@ -1,0 +1,196 @@
+services:
+
+  # ========================================================
+  # POSTGRESQL
+  # ========================================================
+
+  postgres:
+
+    image: postgres:16-alpine
+
+    container_name: restaurant_postgres
+
+    restart: unless-stopped
+
+    environment:
+
+      POSTGRES_DB: ${POSTGRES_DB:-RestaurantDB}
+
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+
+    ports:
+
+      - "5432:5432"
+
+
+    volumes:
+
+      - restaurant_postgres_data:/var/lib/postgresql/data
+
+
+    healthcheck:
+
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-RestaurantDB}"
+        ]
+
+      interval: 10s
+
+      timeout: 5s
+
+      retries: 5
+
+      start_period: 20s
+
+
+    networks:
+      - restaurant_net
+
+
+  # ========================================================
+  # BACKEND
+  # ========================================================
+
+  backend:
+
+    build:
+
+      context: ./backend/restaurant-management
+
+      dockerfile: Dockerfile
+
+
+    container_name: restaurant_backend
+
+    restart: unless-stopped
+
+
+    environment:
+
+      SPRING_PROFILES_ACTIVE: docker
+
+      DB_URL: ${DB_URL:-jdbc:postgresql://postgres:5432/RestaurantDB}
+
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      JWT_SECRET: ${JWT_SECRET}
+
+      MAIL_USERNAME: ${MAIL_USERNAME}
+
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost}
+
+      OAUTH2_REDIRECT_URI: ${OAUTH2_REDIRECT_URI:-http://localhost/oauth2/callback}
+
+      AWS_REGION: ${AWS_REGION:-ap-south-1}
+
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
+
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+
+      TEST_USERS_ENABLED: ${TEST_USERS_ENABLED:-true}
+
+      JAVA_TOOL_OPTIONS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+
+
+    ports:
+
+      - "8080:8080"
+
+
+    depends_on:
+
+      postgres:
+        condition: service_healthy
+
+
+    healthcheck:
+
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://localhost:8080/actuator/health || exit 1"
+        ]
+
+      interval: 30s
+
+      timeout: 10s
+
+      retries: 5
+
+      start_period: 60s
+
+
+    networks:
+      - restaurant_net
+
+
+  # ========================================================
+  # FRONTEND
+  # ========================================================
+
+  frontend:
+
+    build:
+
+      context: ./frontend/restaurant-ui
+
+      dockerfile: Dockerfile
+
+
+    container_name: restaurant_frontend
+
+    restart: unless-stopped
+
+
+    ports:
+
+      - "80:80"
+
+
+    depends_on:
+
+      backend:
+        condition: service_healthy
+
+
+    networks:
+      - restaurant_net
+
+
+# ==========================================================
+# VOLUME
+# ==========================================================
+
+volumes:
+
+  restaurant_postgres_data:
+
+    driver: local
+
+
+# ==========================================================
+# NETWORK
+# ==========================================================
+
+networks:
+
+  restaurant_net:
+
+    driver: bridge
