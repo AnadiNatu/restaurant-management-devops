@@ -1,0 +1,167 @@
+<div class="page-container animate-fade">
+ 
+      <!-- Greeting -->
+      <div class="greeting-row">
+        <div>
+          <h1 class="page-title">{{ greeting() }}, {{ firstName() }} 👋</h1>
+          <p class="page-subtitle">Here's what's happening at your restaurant today.</p>
+        </div>
+        <div class="greeting-date">
+          <span>{{ today | date:'EEEE, MMMM d' }}</span>
+        </div>
+      </div>
+ 
+      <!-- Stat Cards -->
+      @if (loading()) {
+        <div class="loading-overlay">
+          <span class="spinner spinner-lg"></span>
+          <span>Loading dashboard...</span>
+        </div>
+      } @else if (summary()) {
+        <div class="stat-grid">
+          <div class="stat-card stat-amber">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value">₹{{ summary()!.todayRevenue | number:'1.0-0' }}</div>
+            <div class="stat-label">Today's Revenue</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🧾</div>
+            <div class="stat-value">{{ summary()!.todayOrders }}</div>
+            <div class="stat-label">Today's Orders</div>
+          </div>
+          <div class="stat-card stat-warn">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-value">{{ summary()!.pendingOrders }}</div>
+            <div class="stat-label">Pending Orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value">{{ summary()!.totalCustomers }}</div>
+            <div class="stat-label">Total Customers</div>
+          </div>
+          <div class="stat-card" [class.stat-danger]="summary()!.lowStockItems > 0">
+            <div class="stat-icon">📦</div>
+            <div class="stat-value">{{ summary()!.lowStockItems }}</div>
+            <div class="stat-label">Low Stock Items</div>
+            @if (summary()!.lowStockItems > 0) {
+              <a routerLink="/inventory" class="stat-action">View inventory →</a>
+            }
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🍽️</div>
+            <div class="stat-value">{{ summary()!.activeMenuItems }}</div>
+            <div class="stat-label">Active Menu Items</div>
+          </div>
+          @if (auth.isAdmin()) {
+            <div class="stat-card">
+              <div class="stat-icon">🧑‍💼</div>
+              <div class="stat-value">{{ summary()!.totalEmployees }}</div>
+              <div class="stat-label">Employees</div>
+            </div>
+          }
+        </div>
+      }
+ 
+      <!-- Quick Actions -->
+      <div class="section-title">Quick Actions</div>
+      <div class="quick-actions">
+        <a routerLink="/orders/create" class="quick-action-card primary">
+          <span class="qa-icon">➕</span>
+          <div>
+            <div class="qa-title">New Order</div>
+            <div class="qa-desc">Create a new table order</div>
+          </div>
+        </a>
+        <a routerLink="/orders" class="quick-action-card">
+          <span class="qa-icon">🧾</span>
+          <div>
+            <div class="qa-title">View Orders</div>
+            <div class="qa-desc">Manage active orders</div>
+          </div>
+        </a>
+        <a routerLink="/menu" class="quick-action-card">
+          <span class="qa-icon">🍽️</span>
+          <div>
+            <div class="qa-title">Menu</div>
+            <div class="qa-desc">Browse & manage items</div>
+          </div>
+        </a>
+        <a routerLink="/customers" class="quick-action-card">
+          <span class="qa-icon">👥</span>
+          <div>
+            <div class="qa-title">Customers</div>
+            <div class="qa-desc">View customer records</div>
+          </div>
+        </a>
+        @if (auth.isAdmin()) {
+          <a routerLink="/reports" class="quick-action-card">
+            <span class="qa-icon">📊</span>
+            <div>
+              <div class="qa-title">Reports</div>
+              <div class="qa-desc">Revenue & analytics</div>
+            </div>
+          </a>
+          <a routerLink="/inventory" class="quick-action-card">
+            <span class="qa-icon">📦</span>
+            <div>
+              <div class="qa-title">Inventory</div>
+              <div class="qa-desc">Track stock levels</div>
+            </div>
+          </a>
+        }
+      </div>
+ 
+      <!-- Recent Orders -->
+      <div class="section-header">
+        <div class="section-title">Recent Orders</div>
+        <a routerLink="/orders" class="section-link">View all →</a>
+      </div>
+ 
+      @if (recentLoading()) {
+        <div class="loading-overlay" style="padding:2rem">
+          <span class="spinner"></span>
+        </div>
+      } @else if (recentOrders().length > 0) {
+        <div class="card">
+          <div class="table-wrapper" style="border:none;border-radius:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Customer</th>
+                  <th>Table</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (order of recentOrders(); track order.id) {
+                  <tr>
+                    <td><a [routerLink]="['/orders', order.id]" class="order-link">#{{ order.id }}</a></td>
+                    <td>{{ order.customerName || '—' }}</td>
+                    <td>{{ order.tableNumber || '—' }}</td>
+                    <td>
+                      <span class="badge" [class]="'badge-' + order.status.toLowerCase()">
+                        {{ order.status }}
+                      </span>
+                    </td>
+                    <td class="amount-cell">₹{{ order.totalAmount | number:'1.2-2' }}</td>
+                    <td class="time-cell">{{ order.createdAt | date:'hh:mm a' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      } @else {
+        <div class="empty-state">
+          <div class="empty-icon">🧾</div>
+          <h3>No orders yet today</h3>
+          <p>Create your first order to get started.</p>
+          <a routerLink="/orders/create" class="btn btn-primary" style="margin-top:1rem">
+            + New Order
+          </a>
+        </div>
+      }
+    </div>

@@ -1,0 +1,93 @@
+<div class="page-container animate-fade">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Orders</h1>
+          <p class="page-subtitle">{{ filtered().length }} orders</p>
+        </div>
+        <a routerLink="/orders/create" class="btn btn-primary">+ New Order</a>
+      </div>
+ 
+      <!-- Status tabs -->
+      <div class="status-tabs">
+        <button class="status-tab" [class.active]="statusFilter() === ''"
+                (click)="statusFilter.set('')">All</button>
+        @for (s of statuses; track s) {
+          <button class="status-tab" [class.active]="statusFilter() === s"
+                  (click)="statusFilter.set(s)">
+            {{ s }}
+            @if (countByStatus(s) > 0) {
+              <span class="tab-count">{{ countByStatus(s) }}</span>
+            }
+          </button>
+        }
+      </div>
+ 
+      <!-- Search -->
+      <div class="filters-row" style="margin-bottom:1rem">
+        <div class="search-input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input class="form-control" placeholder="Search by customer, table, handler..."
+                 (input)="searchQuery.set($any($event.target).value)" />
+        </div>
+      </div>
+ 
+      @if (loading()) {
+        <div class="loading-overlay"><span class="spinner spinner-lg"></span></div>
+      } @else if (filtered().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">🧾</div>
+          <h3>No orders found</h3>
+          <p>Try changing the status filter or create a new order.</p>
+        </div>
+      } @else {
+        <div class="card">
+          <div class="table-wrapper" style="border:none;border-radius:0">
+            <table>
+              <thead>
+                <tr>
+                  <th>#ID</th>
+                  <th>Customer</th>
+                  <th>Table</th>
+                  <th>Status</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Handled By</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (order of filtered(); track order.id) {
+                  <tr>
+                    <td>
+                      <a [routerLink]="['/orders', order.id]" class="order-id-link">
+                        #{{ order.id }}
+                      </a>
+                    </td>
+                    <td>{{ order.customerName || '—' }}</td>
+                    <td>{{ order.tableNumber || '—' }}</td>
+                    <td>
+                      <span class="badge" [class]="'badge-' + order.status.toLowerCase()">
+                        {{ order.status }}
+                      </span>
+                    </td>
+                    <td>{{ order.items?.length ?? 0 }}</td>
+                    <td class="fw-bold">₹{{ order.totalAmount | number:'1.2-2' }}</td>
+                    <td class="text-muted-sm">{{ order.handledBy || '—' }}</td>
+                    <td class="text-muted-sm">{{ order.createdAt | date:'dd MMM, hh:mm a' }}</td>
+                    <td>
+                      <div class="row-actions">
+                        <a [routerLink]="['/orders', order.id]" class="btn btn-ghost btn-sm" title="View">👁</a>
+                        @if (canCancel(order) && auth.isAdmin()) {
+                          <button class="btn btn-danger btn-sm" (click)="cancelOrder(order)" title="Cancel">✕</button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </div>

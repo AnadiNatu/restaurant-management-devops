@@ -1,0 +1,20 @@
+
+  
+
+    .text-muted-sm { color: var(--text-muted); font-size: 0.82rem; }
+    .row-actions { display: flex; gap: 0.25rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+ 
+    .visits-pill {
+      display: inline-block;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-full);
+      padding: 0.1em 0.6em;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+ 
+    @media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }

@@ -1,0 +1,332 @@
+<div class="page-container animate-fade">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Reports</h1>
+      <p class="page-subtitle">
+        Revenue analytics &amp; inventory costs
+      </p>
+    </div>
+
+    <div class="period-tabs">
+      <button
+        class="period-tab"
+        [class.active]="period() === 'weekly'"
+        (click)="setPeriod('weekly')">
+        Weekly
+      </button>
+
+      <button
+        class="period-tab"
+        [class.active]="period() === 'monthly'"
+        (click)="setPeriod('monthly')">
+        Monthly
+      </button>
+    </div>
+  </div>
+
+
+  @if (loading()) {
+
+    <div class="loading-overlay">
+      <span class="spinner spinner-lg"></span>
+    </div>
+
+  } @else {
+
+    <!-- ========================================================= -->
+    <!-- REVENUE SUMMARY -->
+    <!-- ========================================================= -->
+
+    @if (revenue()) {
+
+      <div class="report-section">
+
+        <h2 class="section-heading">
+          Revenue — {{ period() | titlecase }}
+        </h2>
+
+        <div class="report-cards">
+
+          <div class="report-card highlight">
+            <div class="rc-icon">💰</div>
+
+            <div class="rc-value">
+              ₹{{ revenue()!.totalRevenue | number:'1.0-0' }}
+            </div>
+
+            <div class="rc-label">
+              Total Revenue
+            </div>
+          </div>
+
+
+          <div class="report-card">
+            <div class="rc-icon">🧾</div>
+
+            <div class="rc-value">
+              {{ revenue()!.totalOrders }}
+            </div>
+
+            <div class="rc-label">
+              Total Orders
+            </div>
+          </div>
+
+
+          <div class="report-card">
+            <div class="rc-icon">📅</div>
+
+            <div class="rc-value">
+              ₹{{ avgRevenue() | number:'1.0-0' }}
+            </div>
+
+            <div class="rc-label">
+              Avg. per Order
+            </div>
+          </div>
+
+
+          <div class="report-card">
+            <div class="rc-icon">📆</div>
+
+            <div class="rc-value">
+              {{ revenue()!.from | date:'dd MMM' }}
+              –
+              {{ revenue()!.to | date:'dd MMM' }}
+            </div>
+
+            <div class="rc-label">
+              Period
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    }
+
+
+    <!-- ========================================================= -->
+    <!-- REVENUE BREAKDOWN -->
+    <!-- ========================================================= -->
+
+    @if (revenue() && revenue()!.totalRevenue > 0) {
+
+      <div class="card" style="margin-bottom:1.5rem">
+
+        <div class="card-header">
+          <h3>Revenue Breakdown</h3>
+        </div>
+
+        <div class="card-body">
+
+          <div class="breakdown-bar-wrapper">
+
+            <div class="breakdown-label">
+              <span>Revenue (excl. tax)</span>
+
+              <span class="breakdown-pct">
+                {{ revenueExclTaxPct() | number:'1.0-0' }}%
+              </span>
+            </div>
+
+            <div class="bar-track">
+              <div
+                class="bar-fill"
+                [style.width.%]="revenueExclTaxPct()">
+              </div>
+            </div>
+
+
+            <div
+              class="breakdown-label"
+              style="margin-top:0.75rem">
+
+              <span>Tax collected</span>
+
+              <span>
+                ₹{{ (revenue()!.totalTax ?? 0) | number:'1.0-0' }}
+              </span>
+
+            </div>
+
+            <div class="bar-track">
+              <div
+                class="bar-fill tax-bar"
+                [style.width.%]="taxPct()">
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    }
+
+
+    <!-- ========================================================= -->
+    <!-- INVENTORY COST REPORT -->
+    <!-- ========================================================= -->
+
+    @if (invCost()) {
+
+      <div class="report-section">
+
+        <h2 class="section-heading">
+          Inventory Cost — {{ period() | titlecase }}
+        </h2>
+
+        <div class="report-cards">
+
+          <!-- Total Inventory Cost -->
+
+          <div class="report-card highlight-warn">
+
+            <div class="rc-icon">
+              📦
+            </div>
+
+            <div class="rc-value">
+              ₹{{ invCost()!.totalCost | number:'1.0-0' }}
+            </div>
+
+            <div class="rc-label">
+              Total Inventory Cost
+            </div>
+
+          </div>
+
+
+          <!-- Total Inventory Items -->
+
+          <div class="report-card">
+
+            <div class="rc-icon">
+              🗃️
+            </div>
+
+            <div class="rc-value">
+              {{ invCost()!.totalItems ?? '—' }}
+            </div>
+
+            <div class="rc-label">
+              Total Items
+            </div>
+
+          </div>
+
+
+          <!-- Low Stock -->
+
+          <div
+            class="report-card"
+            [class.warn-card]="(invCost()!.lowStockCount ?? 0) > 0">
+
+            <div class="rc-icon">
+              ⚠️
+            </div>
+
+            <div class="rc-value">
+              {{ invCost()!.lowStockCount ?? 0 }}
+            </div>
+
+            <div class="rc-label">
+              Low Stock Items
+            </div>
+
+          </div>
+
+
+          <!-- Estimated Gross Margin -->
+
+          <div class="report-card">
+
+            <div class="rc-icon">
+              💡
+            </div>
+
+            <div class="rc-value">
+              {{ grossMarginPct() | number:'1.0-0' }}%
+            </div>
+
+            <div class="rc-label">
+              Est. Gross Margin
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    }
+
+
+    <!-- ========================================================= -->
+    <!-- REVENUE VS INVENTORY COST -->
+    <!-- ========================================================= -->
+
+    @if (revenue() && invCost()) {
+
+      <div class="card">
+
+        <div class="card-header">
+          <h3>
+            Revenue vs Inventory Cost
+          </h3>
+        </div>
+
+        <div class="card-body">
+
+          <div class="vs-bar">
+
+            <div
+              class="vs-revenue"
+              [style.flex]="revenue()!.totalRevenue">
+
+              <span class="vs-label">
+                Revenue ₹{{ revenue()!.totalRevenue | number:'1.0-0' }}
+              </span>
+
+            </div>
+
+
+            <div
+              class="vs-cost"
+              [style.flex]="invCost()!.totalCost">
+
+              <span class="vs-label">
+                Cost ₹{{ invCost()!.totalCost | number:'1.0-0' }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="margin-display">
+
+            <span>
+              Estimated Margin
+            </span>
+
+            <strong
+              [class.positive]="grossMarginPct() > 0"
+              [class.negative]="grossMarginPct() <= 0">
+
+              {{ grossMarginPct() | number:'1.1-1' }}%
+
+            </strong>
+
+          </div>
+
+        </div>
+      </div>
+
+    }
+
+  }
+
+</div>

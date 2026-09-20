@@ -1,0 +1,111 @@
+  .period-tabs { display: flex; border: 1px solid var(--border-dim); border-radius: var(--radius-md); overflow: hidden; }
+    .period-tab {
+      padding: 0.45rem 1.1rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--ease-fast);
+    }
+    .period-tab.active { background: var(--accent-amber); color: #0e0b08; }
+    .period-tab:not(.active):hover { background: var(--bg-raised); color: var(--text-primary); }
+ 
+    .report-section { margin-bottom: 1.75rem; }
+    .section-heading {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+ 
+    .report-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+ 
+    .report-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      transition: border-color var(--ease-med);
+    }
+ 
+    .report-card:hover { border-color: var(--border-soft); }
+ 
+    .report-card.highlight { border-color: rgba(232,160,58,0.3); background: rgba(232,160,58,0.04); }
+    .report-card.highlight-warn { border-color: rgba(192,96,58,0.25); background: rgba(192,96,58,0.04); }
+    .report-card.warn-card { border-color: rgba(232,160,58,0.3); }
+ 
+    .rc-icon { font-size: 1.4rem; margin-bottom: 0.25rem; }
+    .rc-value { font-family: var(--font-display); font-size: 1.6rem; color: var(--text-primary); line-height: 1; }
+    .rc-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+ 
+    /* Bar charts */
+    .breakdown-bar-wrapper { display: flex; flex-direction: column; gap: 0.5rem; }
+    .breakdown-label { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); }
+    .breakdown-pct { color: var(--text-muted); font-size: 0.78rem; }
+ 
+    .bar-track {
+      height: 8px;
+      background: var(--bg-raised);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+ 
+    .bar-fill {
+      height: 100%;
+      background: var(--accent-amber);
+      border-radius: 4px;
+      transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
+    }
+ 
+    .bar-fill.tax-bar { background: var(--accent-terra); }
+ 
+    /* VS bar */
+    .vs-bar {
+      display: flex;
+      height: 32px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      gap: 2px;
+      margin-bottom: 0.75rem;
+    }
+ 
+    .vs-revenue {
+      background: var(--accent-amber);
+      display: flex;
+      align-items: center;
+      padding: 0 0.6rem;
+      min-width: 60px;
+      overflow: hidden;
+    }
+ 
+    .vs-cost {
+      background: var(--accent-terra);
+      display: flex;
+      align-items: center;
+      padding: 0 0.6rem;
+      min-width: 60px;
+      overflow: hidden;
+    }
+ 
+    .vs-label { font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ 
+    .margin-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+ 
+    .positive { color: var(--success-light); font-size: 1.1rem; }
+    .negative { color: var(--danger-light); font-size: 1.1rem; }

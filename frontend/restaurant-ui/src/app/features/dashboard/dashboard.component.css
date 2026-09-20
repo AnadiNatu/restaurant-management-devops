@@ -1,0 +1,91 @@
+ .greeting-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+ 
+    .greeting-date {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+ 
+    /* Stat card variants */
+    .stat-card { transition: border-color var(--ease-med), transform var(--ease-med); }
+    .stat-amber { border-color: rgba(232,160,58,0.3); }
+    .stat-amber .stat-value { color: var(--accent-amber2); }
+    .stat-warn { border-color: rgba(232,160,58,0.2); }
+    .stat-danger { border-color: rgba(192,96,58,0.3); }
+    .stat-danger .stat-value { color: var(--danger-light); }
+ 
+    .stat-action {
+      font-size: 0.75rem;
+      color: var(--danger-light);
+      margin-top: 0.25rem;
+      text-decoration: underline;
+    }
+ 
+    /* Quick actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+    }
+ 
+    .quick-action-card {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 1rem 1.1rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      transition: all var(--ease-med);
+      cursor: pointer;
+    }
+ 
+    .quick-action-card:hover {
+      border-color: var(--border-soft);
+      background: var(--bg-raised);
+      transform: translateY(-2px);
+    }
+ 
+    .quick-action-card.primary {
+      border-color: rgba(232,160,58,0.25);
+      background: rgba(232,160,58,0.06);
+    }
+ 
+    .quick-action-card.primary:hover {
+      background: rgba(232,160,58,0.1);
+      border-color: rgba(232,160,58,0.4);
+    }
+ 
+    .qa-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .qa-title { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+    .qa-desc  { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+ 
+    /* Section headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+ 
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+ 
+    .section-link { font-size: 0.82rem; color: var(--accent-amber); }
+ 
+    .order-link { color: var(--accent-amber2); font-weight: 600; }
+    .amount-cell { color: var(--text-primary); font-weight: 600; }
+    .time-cell { color: var(--text-muted); font-size: 0.82rem; }

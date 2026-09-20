@@ -1,0 +1,119 @@
+ <div class="page-container animate-fade">
+      <div class="page-header">
+        <h1 class="page-title">Profile</h1>
+      </div>
+ 
+      @if (loading()) {
+        <div class="loading-overlay"><span class="spinner spinner-lg"></span></div>
+      } @else if (profile()) {
+        <div class="profile-layout">
+ 
+          <!-- Left: Profile card -->
+          <div class="profile-card card">
+            <div class="card-body" style="text-align:center">
+              <div class="profile-avatar">
+                {{ initials() }}
+              </div>
+              <h2 class="profile-name">{{ profile()!.fname }} {{ profile()!.lname }}</h2>
+              <p class="profile-email">{{ profile()!.email }}</p>
+              <div class="profile-role-chip">
+                <span class="badge" [class]="roleClass(profile()!.role)">
+                  {{ profile()!.role.replace('_', ' ') }}
+                </span>
+              </div>
+ 
+              @if (profile()!.phoneNumber) {
+                <div class="profile-phone">📞 {{ profile()!.phoneNumber }}</div>
+              }
+ 
+              <div class="profile-meta">
+                @if (profile()!.createdAt) {
+                  <div class="meta-item">
+                    <span class="meta-label">Member since</span>
+                    <span class="meta-val">{{ profile()!.createdAt | date:'MMM yyyy' }}</span>
+                  </div>
+                }
+                <div class="meta-item">
+                  <span class="meta-label">Status</span>
+                  <span [class]="profile()!.isActive ? 'meta-active' : 'meta-inactive'">
+                    {{ profile()!.isActive ? '● Active' : '● Inactive' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+ 
+          <!-- Right: Edit forms -->
+          <div class="profile-forms">
+ 
+            <!-- Update Profile -->
+            <div class="card" style="margin-bottom:1.25rem">
+              <div class="card-header"><h3>Update Profile</h3></div>
+              <div class="card-body">
+                <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">First Name</label>
+                      <input class="form-control" formControlName="fname" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Last Name</label>
+                      <input class="form-control" formControlName="lname" />
+                    </div>
+                  </div>
+                  <div class="form-group" style="margin-top:0.75rem">
+                    <label class="form-label">Phone Number</label>
+                    <input class="form-control" type="tel" formControlName="phoneNumber"
+                           placeholder="+91 98765 43210" />
+                  </div>
+ 
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" [disabled]="savingProfile()">
+                      @if (savingProfile()) { <span class="spinner"></span> }
+                      {{ savingProfile() ? 'Saving...' : 'Save Changes' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+ 
+            <!-- Change Password -->
+            <div class="card">
+              <div class="card-header"><h3>Change Password</h3></div>
+              <div class="card-body">
+                <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+                  <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <input class="form-control" type="password" formControlName="currentPassword"
+                           placeholder="Enter current password" />
+                  </div>
+                  <div class="form-group" style="margin-top:0.75rem">
+                    <label class="form-label">New Password</label>
+                    <input class="form-control" type="password" formControlName="newPassword"
+                           placeholder="At least 8 characters" />
+                    @if (passwordForm.controls.newPassword.invalid && passwordForm.controls.newPassword.touched) {
+                      <span class="form-error">⚠ Minimum 8 characters</span>
+                    }
+                  </div>
+                  <div class="form-group" style="margin-top:0.75rem">
+                    <label class="form-label">Confirm New Password</label>
+                    <input class="form-control" type="password" formControlName="confirmPassword"
+                           placeholder="Re-enter new password" />
+                    @if (passwordMismatch()) {
+                      <span class="form-error">⚠ Passwords do not match</span>
+                    }
+                  </div>
+ 
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" [disabled]="savingPassword()">
+                      @if (savingPassword()) { <span class="spinner"></span> }
+                      {{ savingPassword() ? 'Changing...' : 'Change Password' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>

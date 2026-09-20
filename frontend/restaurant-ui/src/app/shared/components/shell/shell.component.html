@@ -1,0 +1,83 @@
+<div class="shell" [class.sidebar-collapsed]="collapsed()">
+ 
+      <!-- Sidebar -->
+      <aside class="sidebar" [class.open]="mobileOpen()">
+        <div class="sidebar-header">
+          <div class="brand">
+            <span class="brand-icon">🍽️</span>
+            @if (!collapsed()) {
+              <span class="brand-name">Bistro Hub</span>
+            }
+          </div>
+          <button class="collapse-btn" (click)="collapsed.set(!collapsed())"
+                  [title]="collapsed() ? 'Expand' : 'Collapse'">
+            {{ collapsed() ? '›' : '‹' }}
+          </button>
+        </div>
+ 
+        <nav class="sidebar-nav">
+          @for (item of visibleNav(); track item.route) {
+            <a class="nav-item"
+               [routerLink]="item.route"
+               routerLinkActive="active"
+               [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+               (click)="mobileOpen.set(false)"
+               [title]="collapsed() ? item.label : ''">
+              <span class="nav-icon">{{ item.icon }}</span>
+              @if (!collapsed()) {
+                <span class="nav-label">{{ item.label }}</span>
+              }
+            </a>
+          }
+        </nav>
+ 
+        <div class="sidebar-footer">
+          <a class="nav-item"
+             routerLink="/profile"
+             routerLinkActive="active"
+             (click)="mobileOpen.set(false)"
+             [title]="collapsed() ? 'Profile' : ''">
+            <span class="nav-icon">👤</span>
+            @if (!collapsed()) { <span class="nav-label">Profile</span> }
+          </a>
+          <button class="nav-item logout-btn" (click)="logout()"
+                  [title]="collapsed() ? 'Logout' : ''">
+            <span class="nav-icon">🚪</span>
+            @if (!collapsed()) { <span class="nav-label">Logout</span> }
+          </button>
+        </div>
+      </aside>
+ 
+      <!-- Mobile sidebar backdrop -->
+      @if (mobileOpen()) {
+        <div class="sidebar-backdrop" (click)="mobileOpen.set(false)"></div>
+      }
+ 
+      <!-- Main area -->
+      <div class="main-area">
+ 
+        <!-- Topbar -->
+        <header class="topbar">
+          <button class="menu-btn" (click)="mobileOpen.set(!mobileOpen())">☰</button>
+ 
+          <div class="topbar-breadcrumb">
+            <span class="breadcrumb-label">{{ getCurrentPageLabel() }}</span>
+          </div>
+ 
+          <div class="topbar-right">
+            <div class="role-chip">
+              <span class="role-dot" [class]="'role-' + (auth.role || '').toLowerCase()"></span>
+              {{ auth.role?.replace('_', ' ') }}
+            </div>
+            <div class="user-avatar" [routerLink]="'/profile'" title="Profile">
+              {{ userInitials() }}
+            </div>
+          </div>
+        </header>
+ 
+        <!-- Page content -->
+        <main class="page-content">
+          <router-outlet />
+        </main>
+      </div>
+    </div>

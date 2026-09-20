@@ -1,0 +1,402 @@
+<div class="page-container animate-fade">
+
+  <!-- ========================================================= -->
+  <!-- HEADER -->
+  <!-- ========================================================= -->
+
+  <div class="page-header">
+
+    <div>
+      <h1 class="page-title">Activity Logs</h1>
+
+      <p class="page-subtitle">
+        {{ filtered().length }} events recorded
+      </p>
+    </div>
+
+    <button
+      class="btn btn-ghost btn-sm"
+      (click)="load()">
+      ↻ Refresh
+    </button>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- API FILTERS -->
+  <!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- API FILTER TOOLBAR -->
+<!-- ========================================================= -->
+
+<div class="activity-filter-card">
+
+  <div class="activity-filter-header">
+    <div>
+      <h3>Filter Activity</h3>
+      <span>Query activity logs using the available report filters</span>
+    </div>
+
+    <button
+      class="filter-reset-btn"
+      type="button"
+      (click)="clearFilters()">
+      ↺ Clear
+    </button>
+  </div>
+
+
+  <div class="activity-filter-grid">
+
+    <!-- ===================================================== -->
+    <!-- ACTOR FILTER -->
+    <!-- ===================================================== -->
+
+    <div class="filter-box">
+
+      <div class="filter-box-header">
+        <span class="filter-box-icon">👤</span>
+
+        <div>
+          <label>Actor</label>
+          <span>Find activity by email</span>
+        </div>
+      </div>
+
+      <div class="filter-box-control">
+
+        <input
+          class="form-control"
+          type="email"
+          placeholder="admin@example.com"
+          [value]="actorEmail()"
+          (input)="actorEmail.set($any($event.target).value)" />
+
+        <button
+          class="btn btn-primary btn-sm"
+          type="button"
+          (click)="loadByActor()">
+          Search
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- ENTITY FILTER -->
+    <!-- ===================================================== -->
+
+    <div class="filter-box">
+
+      <div class="filter-box-header">
+        <span class="filter-box-icon">◈</span>
+
+        <div>
+          <label>Entity</label>
+          <span>Filter by entity type</span>
+        </div>
+      </div>
+
+      <div class="filter-box-control">
+
+        <select
+          class="form-select"
+          [value]="entityFilter()"
+          (change)="entityFilter.set($any($event.target).value)">
+
+          <option value="">
+            All Entity Types
+          </option>
+
+          @for (e of entityTypes(); track e) {
+            <option [value]="e">
+              {{ e }}
+            </option>
+          }
+
+        </select>
+
+        <button
+          class="btn btn-primary btn-sm"
+          type="button"
+          (click)="loadByEntityType()">
+          Apply
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- DATE RANGE FILTER -->
+    <!-- ===================================================== -->
+
+    <div class="filter-box filter-box-date">
+
+      <div class="filter-box-header">
+
+        <span class="filter-box-icon">◷</span>
+
+        <div>
+          <label>Date Range</label>
+          <span>Find activity between two dates</span>
+        </div>
+
+      </div>
+
+
+      <div class="date-range-controls">
+
+        <div class="date-field">
+
+          <span>From</span>
+
+          <input
+            class="form-control"
+            type="datetime-local"
+            [value]="fromDate()"
+            (input)="fromDate.set($any($event.target).value)" />
+
+        </div>
+
+
+        <span class="date-separator">→</span>
+
+
+        <div class="date-field">
+
+          <span>To</span>
+
+          <input
+            class="form-control"
+            type="datetime-local"
+            [value]="toDate()"
+            (input)="toDate.set($any($event.target).value)" />
+
+        </div>
+
+
+        <button
+          class="btn btn-primary btn-sm date-search-btn"
+          type="button"
+          (click)="loadBetween()">
+          Search
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- ========================================================= -->
+  <!-- EXISTING CLIENT-SIDE FILTERS -->
+  <!-- ========================================================= -->
+
+  <div class="filters-row">
+
+    <div class="search-input-wrapper">
+
+      <span class="search-icon">
+        🔍
+      </span>
+
+      <input
+        class="form-control"
+        placeholder="Search by actor, action, entity..."
+        [value]="searchQuery()"
+        (input)="searchQuery.set($any($event.target).value)" />
+
+    </div>
+
+
+    <select
+      class="form-select"
+      style="width:auto;min-width:160px"
+      [value]="entityFilter()"
+      (change)="entityFilter.set($any($event.target).value)">
+
+      <option value="">
+        All Entity Types
+      </option>
+
+      @for (e of entityTypes(); track e) {
+
+        <option [value]="e">
+          {{ e }}
+        </option>
+
+      }
+
+    </select>
+
+
+    <select
+      class="form-select"
+      style="width:auto;min-width:130px"
+      [value]="roleFilter()"
+      (change)="roleFilter.set($any($event.target).value)">
+
+      <option value="">
+        All Roles
+      </option>
+
+      <option value="SUPER_ADMIN">
+        Super Admin
+      </option>
+
+      <option value="ADMIN">
+        Admin
+      </option>
+
+      <option value="EMPLOYEE">
+        Employee
+      </option>
+
+    </select>
+
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!-- LOADING -->
+  <!-- ========================================================= -->
+
+  @if (loading()) {
+
+    <div class="loading-overlay">
+      <span class="spinner spinner-lg"></span>
+    </div>
+
+  }
+
+<!-- ========================================================= -->
+<!-- LOADING / EMPTY / LOG LIST -->
+<!-- ========================================================= -->
+
+@if (loading()) {
+
+  <div class="loading-overlay">
+    <span class="spinner spinner-lg"></span>
+  </div>
+
+} @else if (filtered().length === 0) {
+
+  <div class="empty-state">
+
+    <div class="empty-icon">
+      📋
+    </div>
+
+    <h3>
+      No logs found
+    </h3>
+
+    <p>
+      Activity will appear here as users interact with the system.
+    </p>
+
+  </div>
+
+} @else {
+
+  <div class="logs-list">
+
+    @for (log of filtered(); track log.id) {
+
+      <div class="log-entry">
+
+        <div
+          class="log-indicator"
+          [class]="'ind-' + log.actorRole.toLowerCase()">
+        </div>
+
+
+        <div class="log-body">
+
+          <div class="log-top">
+
+            <span class="log-action">
+              {{ formatAction(log.action) }}
+            </span>
+
+            @if (log.entityType) {
+
+              <span class="log-entity">
+                {{ log.entityType }}
+              </span>
+
+            }
+
+            @if (log.entityId) {
+
+              <span class="log-entity-id">
+                #{{ log.entityId }}
+              </span>
+
+            }
+
+          </div>
+
+
+          @if (log.description) {
+
+            <div class="log-desc">
+              {{ log.description }}
+            </div>
+
+          }
+
+
+          <div class="log-meta">
+
+            <span
+              class="badge"
+              [class]="roleClass(log.actorRole)">
+              {{ formatRole(log.actorRole) }}
+            </span>
+
+            <span class="log-actor">
+              {{ log.actorEmail }}
+            </span>
+
+            @if (log.ipAddress) {
+
+              <span class="log-ip">
+                {{ log.ipAddress }}
+              </span>
+
+            }
+
+          </div>
+
+        </div>
+
+
+        <div class="log-time">
+
+          <div class="log-date">
+            {{ log.timestamp | date:'dd MMM yy' }}
+          </div>
+
+          <div class="log-hour">
+            {{ log.timestamp | date:'hh:mm a' }}
+          </div>
+
+        </div>
+
+      </div>
+
+    }
+
+  </div>
+
+}
+
+</div>

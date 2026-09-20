@@ -1,0 +1,421 @@
+    .header-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .text-danger-light { color: var(--danger-light); }
+ 
+    .low-stock-row td:first-child { border-left: 2px solid var(--danger); }
+    .qty-low { color: var(--danger-light); font-weight: 700; }
+ 
+    .cat-chip {
+      font-size: 0.72rem;
+      background: var(--bg-raised);
+      border: 1px solid var(--border-dim);
+      padding: 0.15em 0.55em;
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+    }
+ 
+    .row-actions { display: flex; gap: 0.25rem; }
+ 
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+    /* =========================================================
+   INVENTORY API INSIGHTS
+   ========================================================= */
+
+.inventory-api-card {
+  width: 100%;
+
+  margin-bottom: 1.25rem;
+
+  background: var(--bg-surface);
+
+  border: 1px solid var(--border-dim);
+
+  border-radius: var(--radius-lg);
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.inventory-api-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding: 0.9rem 1.1rem;
+
+  border-bottom: 1px solid var(--border-dim);
+}
+
+.inventory-api-header h3 {
+  margin: 0;
+
+  color: var(--text-primary);
+
+  font-family: var(--font-display);
+
+  font-size: 1rem;
+}
+
+.inventory-api-header span {
+  display: block;
+
+  margin-top: 0.2rem;
+
+  color: var(--text-muted);
+
+  font-size: 0.7rem;
+}
+
+.inventory-api-loading {
+  color: var(--accent-amber) !important;
+
+  font-size: 0.7rem !important;
+
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   API ACTIONS
+   ========================================================= */
+
+.inventory-api-actions {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  width: 100%;
+}
+
+
+/* =========================================================
+   INDIVIDUAL ACTION
+   ========================================================= */
+
+.inventory-api-action {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  min-width: 0;
+
+  padding: 0.9rem 1rem;
+
+  border-right: 1px solid var(--border-dim);
+}
+
+.inventory-api-action:last-child {
+  border-right: none;
+}
+
+
+/* =========================================================
+   ACTION INFORMATION
+   ========================================================= */
+
+.inventory-api-action-info {
+  display: flex;
+
+  align-items: center;
+
+  gap: 0.65rem;
+
+  min-width: 0;
+}
+
+.inventory-api-icon {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+
+  flex-shrink: 0;
+
+  background: var(--bg-raised);
+
+  border: 1px solid var(--border-dim);
+
+  border-radius: var(--radius-md);
+
+  color: var(--accent-amber);
+
+  font-size: 0.85rem;
+}
+
+.inventory-api-action-info strong {
+  display: block;
+
+  color: var(--text-primary);
+
+  font-size: 0.78rem;
+}
+
+.inventory-api-action-info small {
+  display: block;
+
+  margin-top: 0.12rem;
+
+  color: var(--text-faint);
+
+  font-family: monospace;
+
+  font-size: 0.6rem;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   RESULT SECTION
+   ========================================================= */
+
+.inventory-api-result {
+  padding: 0.9rem 1rem;
+
+  border-top: 1px solid var(--border-dim);
+
+  background: var(--bg-raised);
+}
+
+
+/* =========================================================
+   RESULT HEADER
+   ========================================================= */
+
+.inventory-result-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 0.7rem;
+}
+
+.inventory-result-header strong {
+  display: block;
+
+  color: var(--text-primary);
+
+  font-size: 0.8rem;
+}
+
+.inventory-result-header span {
+  display: block;
+
+  margin-top: 0.15rem;
+
+  color: var(--text-muted);
+
+  font-size: 0.68rem;
+}
+
+
+/* =========================================================
+   LOW STOCK LIST
+   ========================================================= */
+
+.inventory-low-stock-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 0.35rem;
+}
+
+.inventory-low-stock-item {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  padding: 0.55rem 0.7rem;
+
+  background: var(--bg-surface);
+
+  border: 1px solid var(--border-dim);
+
+  border-radius: var(--radius-md);
+}
+
+.inventory-low-stock-item > div:first-child {
+  min-width: 0;
+}
+
+.inventory-low-stock-item strong {
+  display: block;
+
+  color: var(--text-primary);
+
+  font-size: 0.75rem;
+}
+
+.inventory-low-stock-item span {
+  display: block;
+
+  margin-top: 0.12rem;
+
+  color: var(--text-muted);
+
+  font-size: 0.65rem;
+}
+
+.inventory-low-stock-quantity {
+  flex-shrink: 0;
+
+  text-align: right;
+}
+
+.inventory-low-stock-quantity strong {
+  color: var(--danger-light);
+}
+
+.inventory-low-stock-quantity span {
+  color: var(--text-faint);
+}
+
+
+/* =========================================================
+   COST SUMMARY
+   ========================================================= */
+
+.cost-summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fit, minmax(150px, 1fr));
+
+  gap: 0.5rem;
+}
+
+.cost-summary-item {
+  padding: 0.65rem 0.75rem;
+
+  background: var(--bg-surface);
+
+  border: 1px solid var(--border-dim);
+
+  border-radius: var(--radius-md);
+
+  min-width: 0;
+}
+
+.cost-summary-item span {
+  display: block;
+
+  margin-bottom: 0.25rem;
+
+  color: var(--text-muted);
+
+  font-size: 0.65rem;
+
+  text-transform: capitalize;
+}
+
+.cost-summary-item strong {
+  display: block;
+
+  color: var(--text-primary);
+
+  font-size: 0.82rem;
+
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   EMPTY RESULT
+   ========================================================= */
+
+.inventory-result-empty {
+  padding: 0.7rem;
+
+  background: var(--bg-surface);
+
+  border: 1px solid var(--border-dim);
+
+  border-radius: var(--radius-md);
+
+  color: var(--text-muted);
+
+  font-size: 0.75rem;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .inventory-api-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-api-action {
+    border-right: none;
+
+    border-bottom: 1px solid var(--border-dim);
+  }
+
+  .inventory-api-action:last-child {
+    border-bottom: none;
+  }
+
+}
+
+
+@media (max-width: 520px) {
+
+  .inventory-api-header {
+    align-items: flex-start;
+
+    gap: 0.75rem;
+  }
+
+  .inventory-api-action {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .inventory-api-action .btn {
+    width: 100%;
+  }
+
+  .inventory-low-stock-item {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .inventory-low-stock-quantity {
+    text-align: left;
+  }
+
+}
+ 
+    @media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } }

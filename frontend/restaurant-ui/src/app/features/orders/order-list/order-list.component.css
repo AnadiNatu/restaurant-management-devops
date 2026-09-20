@@ -1,0 +1,44 @@
+  .status-tabs {
+      display: flex;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-dim);
+    }
+ 
+    .status-tab {
+      padding: 0.38rem 0.85rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dim);
+      border-radius: var(--radius-full);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: var(--font-body);
+      cursor: pointer;
+      transition: all var(--ease-fast);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      white-space: nowrap;
+    }
+ 
+    .status-tab.active { background: var(--accent-amber); color: #0e0b08; border-color: var(--accent-amber); }
+    .status-tab:not(.active):hover { border-color: var(--border-soft); color: var(--text-primary); }
+ 
+    .tab-count {
+      background: rgba(255,255,255,0.15);
+      border-radius: 99px;
+      padding: 0 6px;
+      font-size: 0.7rem;
+      min-width: 18px;
+      text-align: center;
+    }
+ 
+    .status-tab.active .tab-count { background: rgba(0,0,0,0.15); }
+ 
+    .order-id-link { color: var(--accent-amber2); font-weight: 700; }
+    .fw-bold { font-weight: 700; color: var(--text-primary); }
+    .text-muted-sm { color: var(--text-muted); font-size: 0.82rem; }
+    .row-actions { display: flex; gap: 0.25rem; }

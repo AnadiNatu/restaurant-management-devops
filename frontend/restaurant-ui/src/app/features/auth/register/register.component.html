@@ -1,0 +1,54 @@
+  <div class="auth-card animate-up">
+      <div class="auth-header">
+        <h2>Create account</h2>
+        <p>Join Bistro Hub to manage your restaurant.</p>
+      </div>
+ 
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="two-col">
+          <div class="form-group">
+            <label class="form-label">First name</label>
+            <input class="form-control" formControlName="fname" placeholder="Jane" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last name</label>
+            <input class="form-control" formControlName="lname" placeholder="Doe" />
+          </div>
+        </div>
+ 
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input class="form-control" type="email" formControlName="email"
+                 placeholder="you@restaurant.com" />
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <span class="form-error">⚠ Enter a valid email</span>
+          }
+        </div>
+ 
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-control" type="password" formControlName="password"
+                 placeholder="At least 8 characters" />
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+            <span class="form-error">⚠ Minimum 8 characters</span>
+          }
+        </div>
+ 
+        <div class="form-group">
+          <label class="form-label">Phone number (optional)</label>
+          <input class="form-control" type="tel" formControlName="phoneNumber"
+                 placeholder="+91 98765 43210" />
+        </div>
+ 
+        <button class="btn btn-primary w-full submit-btn"
+                type="submit" [disabled]="loading()">
+          @if (loading()) { <span class="spinner"></span> }
+          {{ loading() ? 'Creating account...' : 'Create Account' }}
+        </button>
+      </form>
+ 
+      <p class="auth-footer">
+        Already have an account?
+        <a routerLink="/auth/login">Sign in</a>
+      </p>
+    </div>

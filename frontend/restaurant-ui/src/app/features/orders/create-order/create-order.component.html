@@ -1,0 +1,153 @@
+ <div class="page-container animate-fade">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Create Order</h1>
+          <p class="page-subtitle">Select items and place a new order</p>
+        </div>
+        <a routerLink="/orders" class="btn btn-ghost">← Back to Orders</a>
+      </div>
+ 
+      <div class="order-layout">
+        <!-- Left: Menu + Details -->
+        <div class="order-left">
+ 
+          <!-- Order Details Form -->
+          <div class="card" style="margin-bottom:1.25rem">
+            <div class="card-header"><h3>Order Details</h3></div>
+            <div class="card-body">
+              <form [formGroup]="detailForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Table Number</label>
+                    <input class="form-control" formControlName="tableNumber" placeholder="e.g. T-12" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Customer Name</label>
+                    <input class="form-control" formControlName="customerName" placeholder="Guest name" />
+                  </div>
+                </div>
+                <div class="form-row" style="margin-top:0.75rem">
+                  <div class="form-group">
+                    <label class="form-label">Customer Email</label>
+                    <input class="form-control" type="email" formControlName="customerEmail"
+                           placeholder="For invoice delivery" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Discount (₹)</label>
+                    <input class="form-control" type="number" formControlName="discountAmount"
+                           placeholder="0" min="0" step="0.01" />
+                  </div>
+                </div>
+                <div class="form-group" style="margin-top:0.75rem">
+                  <label class="form-label">Notes</label>
+                  <textarea class="form-control" formControlName="notes" rows="2"
+                            placeholder="Allergies, special requests..."></textarea>
+                </div>
+              </form>
+            </div>
+          </div>
+ 
+          <!-- Menu Selector -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Menu</h3>
+              <div class="search-input-wrapper" style="width:220px">
+                <span class="search-icon">🔍</span>
+                <input class="form-control" placeholder="Search items..."
+                       (input)="menuSearch.set($any($event.target).value)" />
+              </div>
+            </div>
+ 
+            <div class="card-body">
+              <!-- Category filter -->
+              <div class="cat-tabs">
+                <button class="cat-tab" [class.active]="selectedCat() === ''"
+                        (click)="selectedCat.set('')">All</button>
+                @for (cat of menuCategories(); track cat) {
+                  <button class="cat-tab" [class.active]="selectedCat() === cat"
+                          (click)="selectedCat.set(cat)">{{ cat }}</button>
+                }
+              </div>
+ 
+              @if (menuLoading()) {
+                <div class="loading-overlay" style="padding:2rem"><span class="spinner"></span></div>
+              } @else {
+                <div class="menu-select-grid">
+                  @for (item of filteredMenu(); track item.id) {
+                    <div class="menu-select-card" (click)="addToCart(item)"
+                         [class.in-cart]="isInCart(item.id)">
+                      <div class="msc-cat">{{ item.category }}</div>
+                      <div class="msc-name">{{ item.name }}</div>
+                      <div class="msc-price">₹{{ item.price | number:'1.2-2' }}</div>
+                      @if (isInCart(item.id)) {
+                        <div class="msc-badge">In cart ✓</div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+ 
+        <!-- Right: Cart -->
+        <div class="order-right">
+          <div class="card cart-card">
+            <div class="card-header"><h3>Cart ({{ cart().length }})</h3></div>
+            <div class="card-body">
+              @if (cart().length === 0) {
+                <div class="empty-state" style="padding:2rem">
+                  <div class="empty-icon" style="font-size:2rem">🛒</div>
+                  <p style="font-size:0.875rem;margin-top:0.5rem">Click items to add them to the cart.</p>
+                </div>
+              } @else {
+                <div class="cart-items">
+                  @for (item of cart(); track item.menuItem.id) {
+                    <div class="cart-item">
+                      <div class="ci-name">{{ item.menuItem.name }}</div>
+                      <div class="ci-price">₹{{ item.menuItem.price | number:'1.2-2' }}</div>
+                      <div class="ci-qty">
+                        <button class="qty-btn" (click)="decQty(item)">−</button>
+                        <span class="qty-val">{{ item.quantity }}</span>
+                        <button class="qty-btn" (click)="incQty(item)">+</button>
+                      </div>
+                      <div class="ci-subtotal">₹{{ (item.menuItem.price * item.quantity) | number:'1.2-2' }}</div>
+                      <button class="ci-remove" (click)="removeFromCart(item)">✕</button>
+                    </div>
+                  }
+                </div>
+ 
+                <div class="cart-summary">
+                  <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>₹{{ subtotal() | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="summary-row">
+                    <span>Tax</span>
+                    <span>₹{{ estimatedTax() | number:'1.2-2' }}</span>
+                  </div>
+                  @if (discount() > 0) {
+                    <div class="summary-row discount-row">
+                      <span>Discount</span>
+                      <span>−₹{{ discount() | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                  <div class="summary-row total-row">
+                    <span>Total</span>
+                    <span>₹{{ total() | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+ 
+                <button class="btn btn-primary w-full"
+                        style="margin-top:1rem;height:46px"
+                        (click)="placeOrder()"
+                        [disabled]="placing()">
+                  @if (placing()) { <span class="spinner"></span> }
+                  {{ placing() ? 'Placing order...' : 'Place Order' }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
