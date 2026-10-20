@@ -234,6 +234,28 @@ export class ReportService {
   getMonthlyRevenue(): Observable<RevenueSummary>      { return this.http.get<RevenueSummary>(`${this.BASE}/revenue/monthly`); }
   getWeeklyInventoryCost(): Observable<InventoryCostSummary> {return this.http.get<InventoryCostSummary>(`${this.BASE}/inventory/weekly`);}
   getMonthlyInventoryCost(): Observable<InventoryCostSummary> {return this.http.get<InventoryCostSummary>(`${this.BASE}/inventory/monthly`);}
+
+  getWeeklyRevenuePdf(): Observable<Blob> {
+  return this.http.get(
+    `${this.BASE}/revenue/weekly/pdf`,
+    { responseType: 'blob' }
+  );
+}
+
+getMonthlyRevenuePdf(): Observable<Blob> {
+  return this.http.get(
+    `${this.BASE}/revenue/monthly/pdf`,
+    { responseType: 'blob' }
+  );
+}
+
+getDownloadRevenuePdf(from: string, to: string): Observable<Blob> {
+  const params = new HttpParams()
+    .set('from', from)
+    .set('to', to);
+
+  return this.http.get(`${this.BASE}/revenue/pdf`, { params, responseType: 'blob' });
+}
 }
 
 // ── Activity Log Service ──────────────────────────────────────────────────────

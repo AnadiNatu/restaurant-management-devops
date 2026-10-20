@@ -22,11 +22,38 @@ public class Order {
     private String handledBy;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private BigDecimal cgstAmount;
+    private BigDecimal sgstAmount;
+    private BigDecimal igstAmount;
+
+    public BigDecimal getCgstAmount() {
+        return cgstAmount;
+    }
+
+    public void setCgstAmount(BigDecimal cgstAmount) {
+        this.cgstAmount = cgstAmount;
+    }
+
+    public BigDecimal getIgstAmount() {
+        return igstAmount;
+    }
+
+    public void setIgstAmount(BigDecimal igstAmount) {
+        this.igstAmount = igstAmount;
+    }
+
+    public BigDecimal getSgstAmount() {
+        return sgstAmount;
+    }
+
+    public void setSgstAmount(BigDecimal sgstAmount) {
+        this.sgstAmount = sgstAmount;
+    }
 
     public Order() {
     }
 
-    public Order(Long id, Long customerId, String customerName, String customerEmail, String tableNumber, OrderStatus status, List<OrderItem> items, BigDecimal subtotal, BigDecimal taxAmount, BigDecimal discountAmount, BigDecimal totalAmount, String notes, String handledBy, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Order(Long id, Long customerId, String customerName, String customerEmail, String tableNumber, OrderStatus status, List<OrderItem> items, BigDecimal subtotal, BigDecimal taxAmount, BigDecimal discountAmount, BigDecimal totalAmount, String notes, String handledBy, LocalDateTime createdAt, LocalDateTime updatedAt , BigDecimal cgstAmount , BigDecimal sgstAmount , BigDecimal igstAmount) {
         this.id = id;
         this.customerId = customerId;
         this.customerName = customerName;
@@ -42,6 +69,9 @@ public class Order {
         this.handledBy = handledBy;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.cgstAmount = cgstAmount;
+        this.sgstAmount = sgstAmount;
+        this.igstAmount = igstAmount;
     }
 
     public Long getId() {

@@ -71,7 +71,7 @@
                         {{ order.status }}
                       </span>
                     </td>
-                    <td>{{ order.items?.length ?? 0 }}</td>
+                    <td>{{ order.items.length}}</td>
                     <td class="fw-bold">₹{{ order.totalAmount | number:'1.2-2' }}</td>
                     <td class="text-muted-sm">{{ order.handledBy || '—' }}</td>
                     <td class="text-muted-sm">{{ order.createdAt | date:'dd MMM, hh:mm a' }}</td>

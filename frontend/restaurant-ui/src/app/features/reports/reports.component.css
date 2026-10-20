@@ -1,4 +1,4 @@
-  .period-tabs { display: flex; border: 1px solid var(--border-dim); border-radius: var(--radius-md); overflow: hidden; }
+  /* .period-tabs { display: flex; border: 1px solid var(--border-dim); border-radius: var(--radius-md); overflow: hidden; }
     .period-tab {
       padding: 0.45rem 1.1rem;
       background: transparent;
@@ -48,7 +48,6 @@
     .rc-value { font-family: var(--font-display); font-size: 1.6rem; color: var(--text-primary); line-height: 1; }
     .rc-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
  
-    /* Bar charts */
     .breakdown-bar-wrapper { display: flex; flex-direction: column; gap: 0.5rem; }
     .breakdown-label { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); }
     .breakdown-pct { color: var(--text-muted); font-size: 0.78rem; }
@@ -69,7 +68,6 @@
  
     .bar-fill.tax-bar { background: var(--accent-terra); }
  
-    /* VS bar */
     .vs-bar {
       display: flex;
       height: 32px;
@@ -108,4 +106,826 @@
     }
  
     .positive { color: var(--success-light); font-size: 1.1rem; }
-    .negative { color: var(--danger-light); font-size: 1.1rem; }
+    .negative { color: var(--danger-light); font-size: 1.1rem; } */
+
+    /* =========================================================
+   PAGE LAYOUT
+   ========================================================= */
+
+.reports-page {
+  width: 100%;
+  min-width: 0;
+}
+
+.reports-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.report-section {
+  margin-bottom: 1.75rem;
+  min-width: 0;
+}
+
+.section-heading {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.section-description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.period-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   PERIOD TABS
+   ========================================================= */
+
+.period-tabs {
+  display: inline-flex;
+  flex-shrink: 0;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.period-tab {
+  padding: 0.65rem 1.1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--ease-fast),
+    color var(--ease-fast),
+    opacity var(--ease-fast);
+}
+
+.period-tab.active {
+  background: var(--accent-amber);
+  color: #0e0b08;
+}
+
+.period-tab:not(.active):hover:not(:disabled) {
+  background: var(--bg-raised);
+  color: var(--text-primary);
+}
+
+.period-tab:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.download-button,
+.custom-download-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.download-button:disabled,
+.custom-download-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: report-spin 0.7s linear infinite;
+}
+
+@keyframes report-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   LOADING AND ALERTS
+   ========================================================= */
+
+.loading-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  min-height: 220px;
+  padding: 2rem;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.loading-panel p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.report-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.report-alert-error {
+  border-color: rgba(192, 96, 58, 0.4);
+  background: rgba(192, 96, 58, 0.08);
+  color: var(--text-primary);
+}
+
+.report-alert-success {
+  border-color: rgba(70, 160, 110, 0.35);
+  background: rgba(70, 160, 110, 0.08);
+  color: var(--text-primary);
+}
+
+.alert-action {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.alert-action:hover {
+  background: var(--bg-raised);
+}
+
+
+/* =========================================================
+   REPORT CARDS
+   ========================================================= */
+
+.report-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.report-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 1.2rem;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  transition:
+    border-color var(--ease-med),
+    transform var(--ease-med);
+}
+
+.report-card:hover {
+  border-color: var(--border-soft);
+  transform: translateY(-2px);
+}
+
+.report-card.highlight {
+  border-color: rgba(232, 160, 58, 0.4);
+  background: rgba(232, 160, 58, 0.05);
+}
+
+.report-card.highlight-invoice {
+  border-color: rgba(90, 150, 220, 0.35);
+  background: rgba(90, 150, 220, 0.05);
+}
+
+.report-card.highlight-tax {
+  border-color: rgba(192, 96, 58, 0.35);
+  background: rgba(192, 96, 58, 0.05);
+}
+
+.report-card.highlight-warn {
+  border-color: rgba(192, 96, 58, 0.3);
+  background: rgba(192, 96, 58, 0.04);
+}
+
+.report-card.warn-card {
+  border-color: rgba(232, 160, 58, 0.55);
+}
+
+.rc-icon {
+  margin-bottom: 0.15rem;
+  font-size: 1.4rem;
+  line-height: 1.4;
+}
+
+.rc-label {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.rc-value {
+  max-width: 100%;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1.5vw, 1.55rem);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.rc-note {
+  margin: 0.1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+
+/* =========================================================
+   GENERIC REPORT PANELS
+   ========================================================= */
+
+.report-panel {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.report-panel .card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.report-panel .card-header h3 {
+  margin: 0 0 0.35rem;
+}
+
+.report-panel .card-body {
+  min-width: 0;
+}
+
+
+/* =========================================================
+   REVENUE / GST BREAKDOWN
+   ========================================================= */
+
+.breakdown-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.breakdown-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.breakdown-label strong {
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tax-breakdown-label {
+  margin-top: 0.65rem;
+}
+
+.bar-track {
+  width: 100%;
+  height: 9px;
+  border-radius: 5px;
+  background: var(--bg-raised);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  min-width: 0;
+  border-radius: 5px;
+  background: var(--accent-amber);
+  transition: width 0.5s ease;
+}
+
+.bar-fill.tax-bar {
+  background: var(--accent-terra);
+}
+
+.breakdown-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.7rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+.legend-item strong {
+  margin-left: auto;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  flex: 0 0 9px;
+  border-radius: 50%;
+}
+
+.revenue-dot {
+  background: var(--accent-amber);
+}
+
+.tax-dot {
+  background: var(--accent-terra);
+}
+
+.invoice-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.invoice-total-row strong {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   CGST / SGST / IGST CARDS
+   ========================================================= */
+
+.tax-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.tax-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+}
+
+.tax-card-label {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tax-card strong {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 1.7vw, 1.5rem);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.tax-card-note {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.report-footnote {
+  margin: 0.9rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+
+/* =========================================================
+   REVENUE VS COST BAR
+   ========================================================= */
+
+.vs-bar {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  gap: 3px;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.vs-revenue,
+.vs-cost {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 0.65rem;
+  overflow: hidden;
+}
+
+.vs-revenue {
+  background: var(--accent-amber);
+}
+
+.vs-cost {
+  background: var(--accent-terra);
+}
+
+.vs-label {
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 0.73rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.margin-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.margin-title {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.margin-subtitle {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.margin-display strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.margin-amount-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-dim);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.margin-amount-row strong {
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   POSITIVE / NEGATIVE VALUES
+   ========================================================= */
+
+.positive {
+  color: var(--success-light);
+}
+
+.negative {
+  color: var(--danger-light);
+}
+
+
+/* =========================================================
+   CUSTOM PDF FORM
+   ========================================================= */
+
+.custom-pdf-section {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.custom-date-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 1rem;
+}
+
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.date-field label {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.date-field input {
+  width: 100%;
+  min-height: 42px;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: inherit;
+  color-scheme: dark;
+}
+
+.date-field input:focus {
+  outline: 2px solid rgba(232, 160, 58, 0.45);
+  outline-offset: 1px;
+  border-color: var(--accent-amber);
+}
+
+.custom-download-button {
+  min-height: 42px;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 250px;
+  padding: 2rem;
+  border: 1px dashed var(--border-dim);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 2rem;
+}
+
+.empty-state h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+}
+
+.empty-state p {
+  max-width: 420px;
+  margin: 0 0 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+
+/* =========================================================
+   RESPONSIVE BREAKPOINTS
+   ========================================================= */
+
+@media (max-width: 1200px) {
+  .report-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .report-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .custom-date-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .custom-download-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .reports-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .period-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .period-tab {
+    padding: 0.7rem 0.5rem;
+  }
+
+  .download-button {
+    width: 100%;
+  }
+
+  .section-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .period-chip {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .report-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .report-card {
+    padding: 0.95rem;
+  }
+
+  .rc-value {
+    font-size: 1.1rem;
+  }
+
+  .rc-label {
+    font-size: 0.68rem;
+  }
+
+  .rc-note {
+    font-size: 0.72rem;
+  }
+
+  .tax-cards {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .tax-card {
+    padding: 1rem;
+  }
+
+  .breakdown-legend {
+    grid-template-columns: 1fr;
+  }
+
+  .custom-date-form {
+    grid-template-columns: 1fr;
+  }
+
+  .custom-download-button {
+    grid-column: auto;
+    width: 100%;
+  }
+
+  .vs-bar {
+    height: auto;
+    min-height: 38px;
+    flex-direction: column;
+  }
+
+  .vs-revenue,
+  .vs-cost {
+    min-height: 36px;
+    flex: 1 1 auto !important;
+  }
+
+  .vs-label {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .invoice-total-row strong {
+    font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .report-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .report-card {
+    padding: 1rem;
+  }
+
+  .rc-value {
+    font-size: 1.25rem;
+  }
+
+  .report-alert {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

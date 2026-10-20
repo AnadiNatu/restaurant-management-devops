@@ -2,7 +2,6 @@
 # .gitignore — devops/ (Docker Compose & deployment configs)
 # ================================================================
 
-
 # ── SECRETS — most important section ─────────────────────────
 # These files hold real credentials for local and production.
 # Templates (.env.example, .env.prod.example) ARE committed.
@@ -36,7 +35,6 @@ docker-compose.override.yml
 # for local machine overrides. Never commit it.
 docker-compose.override.yml
 
-
 # ── OS artefacts ─────────────────────────────────────────────
 .DS_Store
 .DS_Store?
@@ -47,6 +45,8 @@ ehthumbs.db
 Thumbs.db
 desktop.ini
 
+# ── Node JS ─────────────────────────────────────────────
+node_modules/
 
 # ── IDE ──────────────────────────────────────────────────────
 .idea/

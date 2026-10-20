@@ -37,9 +37,13 @@ public class OrderServiceImpl implements OrderService {
     private final CustomerPort customerPort;
     private final EmailService emailService;
 
+
     @Override
     @Transactional
-    public OrderDto.Response create(OrderDto.CreateRequest request, String handledBy) {
+    public OrderDto.Response create(
+            OrderDto.CreateRequest request,
+            String handledBy
+    ) {
         Order order = new Order();
         order.setHandledBy(handledBy);
         order.setTableNumber(request.getTableNumber());
@@ -52,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
                 order.setCustomerId(c.getId());
                 order.setCustomerName(c.getName());
                 order.setCustomerEmail(c.getEmail());
-                // Increment visit count
+
                 c.setTotalVisits(c.getTotalVisits() + 1);
                 customerPort.save(c);
             });
@@ -62,53 +66,194 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Build order items
-        List<OrderItem> items = request.getItems().stream().map(req -> {
-            MenuItem menuItem = menuItemPort.findById(req.getMenuItemId())
-                    .orElseThrow(() -> new ResourceNotFoundException("MenuItem", "id", req.getMenuItemId()));
+        List<OrderItem> items = request.getItems().stream()
+                .map(req -> {
+                    MenuItem menuItem = menuItemPort.findById(req.getMenuItemId())
+                            .orElseThrow(() ->
+                                    new ResourceNotFoundException(
+                                            "MenuItem",
+                                            "id",
+                                            req.getMenuItemId()
+                                    )
+                            );
 
-            if (!Boolean.TRUE.equals(menuItem.getIsAvailable())) {
-                throw new InvalidOperationException("createOrder",
-                        "Menu item '" + menuItem.getName() + "' is not available");
-            }
+                    if (!Boolean.TRUE.equals(menuItem.getIsAvailable())) {
+                        throw new InvalidOperationException(
+                                "createOrder",
+                                "Menu item '" + menuItem.getName()
+                                        + "' is not available"
+                        );
+                    }
 
-            BigDecimal taxRate = menuItem.getTaxRate() != null ? menuItem.getTaxRate() : BigDecimal.ZERO;
-            BigDecimal unitPrice = menuItem.getPrice();
-            BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(req.getQuantity()))
-                    .setScale(2, RoundingMode.HALF_UP);
+                    if (req.getQuantity() <= 0) {
+                        throw new InvalidOperationException(
+                                "createOrder",
+                                "Item quantity must be greater than zero"
+                        );
+                    }
 
-            OrderItem item = new OrderItem();
-            item.setMenuItemId(menuItem.getId());
-            item.setMenuItemName(menuItem.getName());
-            item.setQuantity(req.getQuantity());
-            item.setUnitPrice(unitPrice);
-            item.setTaxRate(taxRate);
-            item.setSubtotal(subtotal);
+                    BigDecimal taxRate = menuItem.getTaxRate() != null
+                            ? menuItem.getTaxRate()
+                            : BigDecimal.ZERO;
 
-            return item;
-        }).collect(Collectors.toList());
+                    BigDecimal unitPrice = menuItem.getPrice();
+                    if (unitPrice == null || unitPrice.signum() < 0) {
+                        throw new InvalidOperationException(
+                                "createOrder",
+                                "Menu item price must be non-negative"
+                        );
+                    }
+
+                    if (taxRate.signum() < 0) {
+                        throw new InvalidOperationException(
+                                "createOrder",
+                                "Tax rate must be non-negative"
+                        );
+                    }
+
+                    BigDecimal lineSubtotal = unitPrice
+                            .multiply(BigDecimal.valueOf(req.getQuantity()))
+                            .setScale(2, RoundingMode.HALF_UP);
+
+                    OrderItem item = new OrderItem();
+                    item.setMenuItemId(menuItem.getId());
+                    item.setMenuItemName(menuItem.getName());
+                    item.setQuantity(req.getQuantity());
+                    item.setUnitPrice(unitPrice);
+                    item.setTaxRate(taxRate);
+                    item.setSubtotal(lineSubtotal);
+
+                    return item;
+                })
+                .collect(Collectors.toList());
+
+        if (items.isEmpty()) {
+            throw new InvalidOperationException(
+                    "createOrder",
+                    "An order must contain at least one item"
+            );
+        }
 
         order.setItems(items);
 
-        BigDecimal subtotal = items.stream().map(OrderItem::getSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal subtotal = items.stream()
+                .map(OrderItem::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
 
-        BigDecimal taxAmount = items.stream().map(i ->
-                        i.getSubtotal().multiply(i.getTaxRate())
-                                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal discount = request.getDiscountAmount() != null
+                ? request.getDiscountAmount().setScale(2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
 
-        BigDecimal discount = request.getDiscountAmount() != null ? request.getDiscountAmount() : BigDecimal.ZERO;
-        BigDecimal total = subtotal.add(taxAmount).subtract(discount).setScale(2, RoundingMode.HALF_UP);
+        if (discount.signum() < 0) {
+            throw new InvalidOperationException("createOrder", "Discount cannot be negative");
+        }
+
+        if (discount.compareTo(subtotal) > 0) {
+            throw new InvalidOperationException("createOrder", "Discount cannot exceed the order subtotal");
+        }
+
+        // Allocate the order-level discount across items proportionally.
+        // Assign any rounding remainder to the final item.
+        BigDecimal remainingDiscount = discount;
+        BigDecimal remainingSubtotal = subtotal;
+
+        BigDecimal taxAmount = BigDecimal.ZERO;
+        BigDecimal cgstAmount = BigDecimal.ZERO;
+        BigDecimal sgstAmount = BigDecimal.ZERO;
+        BigDecimal igstAmount = BigDecimal.ZERO;
+
+        for (int index = 0; index < items.size(); index++) {
+            OrderItem item = items.get(index);
+            BigDecimal lineSubtotal = item.getSubtotal();
+
+            BigDecimal lineDiscount;
+
+            if (index == items.size() - 1) {
+                lineDiscount = remainingDiscount;
+            } else if (remainingSubtotal.signum() == 0) {
+                lineDiscount = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+            } else {
+                lineDiscount = discount
+                        .multiply(lineSubtotal)
+                        .divide(subtotal, 2, RoundingMode.HALF_UP);
+
+                // Prevent rounding from allocating more than remains.
+                lineDiscount = lineDiscount.min(remainingDiscount);
+            }
+
+            remainingDiscount = remainingDiscount.subtract(lineDiscount);
+            remainingSubtotal = remainingSubtotal.subtract(lineSubtotal);
+
+            BigDecimal lineTaxable = lineSubtotal.subtract(lineDiscount)
+                    .setScale(2, RoundingMode.HALF_UP);
+
+            BigDecimal lineTax = lineTaxable
+                    .multiply(item.getTaxRate())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+            // SAME-STATE SUPPLY ASSUMPTION:
+            // Split each line's GST into CGST and SGST.
+            // Assign rounding remainder to SGST.
+            BigDecimal lineCgst = lineTax
+                    .divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
+            BigDecimal lineSgst = lineTax.subtract(lineCgst);
+
+            cgstAmount = cgstAmount.add(lineCgst);
+            sgstAmount = sgstAmount.add(lineSgst);
+            taxAmount = taxAmount.add(lineTax);
+        }
+
+        taxAmount = taxAmount.setScale(2, RoundingMode.HALF_UP);
+        cgstAmount = cgstAmount.setScale(2, RoundingMode.HALF_UP);
+        sgstAmount = sgstAmount.setScale(2, RoundingMode.HALF_UP);
+        igstAmount = igstAmount.setScale(2, RoundingMode.HALF_UP);
+
+        // Reconcile the stored tax and its components.
+        BigDecimal componentTotal = cgstAmount
+                .add(sgstAmount)
+                .add(igstAmount)
+                .setScale(2, RoundingMode.HALF_UP);
+
+        if (componentTotal.compareTo(taxAmount) != 0) {
+            throw new IllegalStateException(
+                    "GST components do not match the calculated tax"
+            );
+        }
+
+        BigDecimal total = subtotal
+                .subtract(discount)
+                .add(taxAmount)
+                .setScale(2, RoundingMode.HALF_UP);
 
         order.setSubtotal(subtotal);
-        order.setTaxAmount(taxAmount);
         order.setDiscountAmount(discount);
+        order.setTaxAmount(taxAmount);
+        order.setCgstAmount(cgstAmount);
+        order.setSgstAmount(sgstAmount);
+        order.setIgstAmount(igstAmount);
         order.setTotalAmount(total);
 
         Order saved = orderPort.save(order);
-        log.info("[ORDER] Created | id={} | total={} | by={}", saved.getId(), saved.getTotalAmount(), handledBy);
+
+        log.info(
+                "[ORDER] Created | id={} | subtotal={} | discount={} "
+                        + "| tax={} | CGST={} | SGST={} | IGST={} "
+                        + "| total={} | by={}",
+                saved.getId(),
+                saved.getSubtotal(),
+                saved.getDiscountAmount(),
+                saved.getTaxAmount(),
+                saved.getCgstAmount(),
+                saved.getSgstAmount(),
+                saved.getIgstAmount(),
+                saved.getTotalAmount(),
+                handledBy
+        );
+
         return toResponse(saved);
     }
+
 
     @Override
     @Transactional

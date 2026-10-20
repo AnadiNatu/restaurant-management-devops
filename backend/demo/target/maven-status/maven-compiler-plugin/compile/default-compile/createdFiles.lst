@@ -21,6 +21,7 @@ com\example\demo\adapter\web\dto\OrderDto$BillResponse.class
 com\example\demo\adapter\web\service\OrderService.class
 com\example\demo\domain\port\InventoryPort.class
 com\example\demo\adapter\web\dto\InventoryDto$CreateRequest.class
+com\example\demo\adapter\web\service\impl\RestaurantTaxCalculator.class
 com\example\demo\adapter\web\dto\AuthDto$RegisterRequest.class
 com\example\demo\adapter\persistence\mapper\CustomerMapper.class
 com\example\demo\adapter\web\dto\ReportDto$InventoryCostSummary.class
@@ -62,6 +63,7 @@ com\example\demo\domain\port\MenuItemPort.class
 com\example\demo\adapter\web\controller\InventoryController.class
 com\example\demo\adapter\persistence\repository\MenuItemRepository.class
 com\example\demo\adapter\persistence\entity\InventoryItemEntity.class
+com\example\demo\adapter\web\service\impl\RestaurantTaxCalculator$TaxBreakdown$TaxBreakdownBuilder.class
 com\example\demo\adapter\web\service\impl\OrderServiceImpl.class
 com\example\demo\domain\model\User.class
 com\example\demo\adapter\persistence\entity\ActivityLogEntity$ActivityLogEntityBuilder.class
@@ -97,6 +99,7 @@ com\example\demo\notification_email\OtpStore.class
 com\example\demo\adapter\persistence\entity\OrderEntity.class
 com\example\demo\adapter\web\dto\AuthDto$AuthResponse.class
 com\example\demo\adapter\web\controller\AdminController.class
+com\example\demo\adapter\web\service\impl\RestaurantTaxCalculator$TaxBreakdown.class
 com\example\demo\domain\model\enums\CustomerType.class
 com\example\demo\adapter\web\service\impl\ActivityLogServiceImpl.class
 com\example\demo\DemoApplication.class
@@ -115,6 +118,7 @@ com\example\demo\aspect\PerformanceLoggingAspect.class
 com\example\demo\exception\ResourceNotFoundException.class
 com\example\demo\adapter\web\service\impl\S3ServiceImpl.class
 com\example\demo\adapter\web\service\UserManagementService.class
+com\example\demo\config\RestaurantTaxProperties.class
 com\example\demo\adapter\security\JwtAuthenticationFilter.class
 com\example\demo\adapter\persistence\repository\ActivityLogRepository.class
 com\example\demo\adapter\web\dto\MenuItemDto$CreateRequest.class
@@ -128,6 +132,7 @@ com\example\demo\adapter\persistence\repository\CustomerRepository.class
 com\example\demo\adapter\persistence\entity\CustomerEntity$CustomerEntityBuilder.class
 com\example\demo\adapter\web\service\impl\MenuServiceImpl.class
 com\example\demo\adapter\web\controller\OtpController.class
+com\example\demo\config\RevenueReportPdfGenerator.class
 com\example\demo\adapter\persistence\entity\UserEntity$UserEntityBuilder.class
 com\example\demo\adapter\web\dto\AuthDto.class
 com\example\demo\adapter\web\service\InventoryService.class

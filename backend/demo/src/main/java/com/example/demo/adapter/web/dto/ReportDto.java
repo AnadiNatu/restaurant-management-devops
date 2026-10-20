@@ -11,6 +11,13 @@ public class ReportDto {
     public static class RevenueSummary {
         private BigDecimal totalRevenue;
         private BigDecimal totalTax;
+        private BigDecimal taxableSales;
+        private BigDecimal grossSales;
+        private BigDecimal totalDiscount;
+        private BigDecimal totalInvoiceValue;
+        private BigDecimal totalCgst;
+        private BigDecimal totalSgst;
+        private BigDecimal totalIgst;
         private Long totalOrders;
         private LocalDateTime from;
         private LocalDateTime to;

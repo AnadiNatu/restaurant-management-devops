@@ -1,146 +1,54 @@
 services:
-
-  # ========================================================
-  # BACKEND
-  # ========================================================
-
   backend:
-
     image: anadinatu/restaurant-management-backend:latest
-
     container_name: restaurant_backend
-
     restart: unless-stopped
-
     environment:
+     SPRING_PROFILES_ACTIVE: prod
 
-      # Spring profile
-      SPRING_PROFILES_ACTIVE: docker
-
-      # ----------------------------------------------------
-      # DATABASE
-      # ----------------------------------------------------
-
-      DB_URL: ${DB_URL}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-
-      # ----------------------------------------------------
-      # JWT
-      # ----------------------------------------------------
-
-      JWT_SECRET: ${JWT_SECRET}
-
-      # ----------------------------------------------------
-      # MAIL
-      # ----------------------------------------------------
-
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
-
-      # ----------------------------------------------------
-      # GOOGLE OAUTH2
-      # ----------------------------------------------------
-
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-
-      # ----------------------------------------------------
-      # FRONTEND
-      # ----------------------------------------------------
-
-      FRONTEND_URL: ${FRONTEND_URL}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
-      OAUTH2_REDIRECT_URI: ${OAUTH2_REDIRECT_URI}
-
-      # ----------------------------------------------------
-      # AWS S3
-      # ----------------------------------------------------
-
-      AWS_REGION: ${AWS_REGION:-ap-south-1}
-      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
-
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-
-      # ----------------------------------------------------
-      # TEST USERS
-      # ----------------------------------------------------
-
-      TEST_USERS_ENABLED: ${TEST_USERS_ENABLED:-false}
-
-      # ----------------------------------------------------
-      # JVM
-      # ----------------------------------------------------
-
-      JAVA_TOOL_OPTIONS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
-
-
-    ports:
-
-      - "8080:8080"
-
-
+     POSTGRES_HOST: ${POSTGRES_HOST:?Set production RDS hostname}
+     POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+     POSTGRES_DB: ${POSTGRES_DB:?Set production database name}
+     POSTGRES_USERNAME: ${POSTGRES_USERNAME:?Set production database username}
+     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set production database password}
+     JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+     MAIL_USERNAME: ${MAIL_USERNAME:?Set MAIL_USERNAME}
+     MAIL_PASSWORD: ${MAIL_PASSWORD:?Set MAIL_PASSWORD}
+     GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?Set GOOGLE_CLIENT_ID}
+     GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?Set GOOGLE_CLIENT_SECRET}
+     FRONTEND_URL: ${FRONTEND_URL:?Set FRONTEND_URL}
+     CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?Set CORS_ALLOWED_ORIGINS}
+     OAUTH2_REDIRECT_URI: ${OAUTH2_REDIRECT_URI:?Set OAUTH2_REDIRECT_URI}
+     AWS_REGION: ${AWS_REGION:-ap-south-1}
+     AWS_BUCKET_NAME: ${AWS_BUCKET_NAME:?Set AWS_BUCKET_NAME}
+     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+     TEST_USERS_ENABLED: ${TEST_USERS_ENABLED}
+     JAVA_TOOL_OPTIONS: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+    expose:
+      - "8080"
     healthcheck:
-
-      test:
-        [
-          "CMD-SHELL",
-          "wget -qO- http://localhost:8080/actuator/health || exit 1"
-        ]
-
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health >/dev/null || exit 1"]
       interval: 30s
-
       timeout: 10s
-
       retries: 5
-
       start_period: 60s
-
-
-    networks:
-      - restaurant_net
-
-
-  # ========================================================
-  # FRONTEND
-  # ========================================================
+    networks: [restaurant_net]
 
   frontend:
-
     image: anadinatu/restaurant-ui:latest
-
     container_name: restaurant_frontend
-
     restart: unless-stopped
-
-    volumes:
-
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-
-
     ports:
-
       - "80:80"
       - "443:443"
-
-
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
-
       backend:
         condition: service_healthy
-
-
-    networks:
-      - restaurant_net
-
-
-# ==========================================================
-# NETWORK
-# ==========================================================
+    networks: [restaurant_net]
 
 networks:
-
   restaurant_net:
-
     driver: bridge

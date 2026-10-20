@@ -30,6 +30,9 @@ public class OrderMapper {
         order.setHandledBy(entity.getHandledBy());
         order.setCreatedAt(entity.getCreatedAt());
         order.setUpdatedAt(entity.getUpdatedAt());
+        order.setCgstAmount(entity.getCgstAmount());
+        order.setSgstAmount(entity.getSgstAmount());
+        order.setIgstAmount(entity.getIgstAmount());
         if (entity.getItems() != null) {
             order.setItems(entity.getItems().stream().map(this::itemToDomain).collect(Collectors.toList()));
         }
@@ -64,6 +67,9 @@ public class OrderMapper {
         entity.setTotalAmount(domain.getTotalAmount());
         entity.setNotes(domain.getNotes());
         entity.setHandledBy(domain.getHandledBy());
+        entity.setCgstAmount(domain.getCgstAmount());
+        entity.setSgstAmount(domain.getSgstAmount());
+        entity.setIgstAmount(domain.getIgstAmount());
         if (domain.getItems() != null) {
             for (OrderItem item : domain.getItems()) {
                 OrderItemEntity itemEntity = itemToEntity(item, entity);

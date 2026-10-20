@@ -1,4 +1,4 @@
-<div class="page-container animate-fade">
+<!-- <div class="page-container animate-fade">
 
   <div class="page-header">
     <div>
@@ -34,9 +34,6 @@
 
   } @else {
 
-    <!-- ========================================================= -->
-    <!-- REVENUE SUMMARY -->
-    <!-- ========================================================= -->
 
     @if (revenue()) {
 
@@ -107,10 +104,7 @@
     }
 
 
-    <!-- ========================================================= -->
-    <!-- REVENUE BREAKDOWN -->
-    <!-- ========================================================= -->
-
+    
     @if (revenue() && revenue()!.totalRevenue > 0) {
 
       <div class="card" style="margin-bottom:1.5rem">
@@ -165,11 +159,6 @@
 
     }
 
-
-    <!-- ========================================================= -->
-    <!-- INVENTORY COST REPORT -->
-    <!-- ========================================================= -->
-
     @if (invCost()) {
 
       <div class="report-section">
@@ -180,7 +169,6 @@
 
         <div class="report-cards">
 
-          <!-- Total Inventory Cost -->
 
           <div class="report-card highlight-warn">
 
@@ -199,7 +187,6 @@
           </div>
 
 
-          <!-- Total Inventory Items -->
 
           <div class="report-card">
 
@@ -218,7 +205,6 @@
           </div>
 
 
-          <!-- Low Stock -->
 
           <div
             class="report-card"
@@ -239,7 +225,6 @@
           </div>
 
 
-          <!-- Estimated Gross Margin -->
 
           <div class="report-card">
 
@@ -263,10 +248,6 @@
 
     }
 
-
-    <!-- ========================================================= -->
-    <!-- REVENUE VS INVENTORY COST -->
-    <!-- ========================================================= -->
 
     @if (revenue() && invCost()) {
 
@@ -328,5 +309,491 @@
     }
 
   }
+
+</div> -->
+
+<div class="page-container animate-fade reports-page">
+
+  <!-- Page heading -->
+  <header class="page-header reports-header">
+    <div>
+      <h1 class="page-title">Reports &amp; Analytics</h1>
+      <p class="page-subtitle">
+        Revenue, GST breakdown, invoice totals and inventory costs
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <div class="period-tabs" role="group" aria-label="Report period">
+        <button
+          type="button"
+          class="period-tab"
+          [class.active]="period() === 'weekly'"
+          [attr.aria-pressed]="period() === 'weekly'"
+          [disabled]="loading()"
+          (click)="setPeriod('weekly')">
+          Weekly
+        </button>
+
+        <button
+          type="button"
+          class="period-tab"
+          [class.active]="period() === 'monthly'"
+          [attr.aria-pressed]="period() === 'monthly'"
+          [disabled]="loading()"
+          (click)="setPeriod('monthly')">
+          Monthly
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-primary download-button"
+        [disabled]="loading() || downloading()"
+        (click)="downloadPeriodPdf()">
+        @if (downloading()) {
+          <span class="button-spinner" aria-hidden="true"></span>
+          Preparing PDF…
+        } @else {
+          <span aria-hidden="true">⬇</span>
+          Download {{ period() === 'weekly' ? 'Weekly' : 'Monthly' }} PDF
+        }
+      </button>
+    </div>
+  </header>
+
+  <!-- Error feedback -->
+  @if (errorMessage()) {
+    <div class="report-alert report-alert-error" role="alert">
+      <span>{{ errorMessage() }}</span>
+
+      <button
+        type="button"
+        class="alert-action"
+        (click)="fetch()">
+        Retry
+      </button>
+    </div>
+  }
+
+  @if (downloadMessage()) {
+    <div class="report-alert report-alert-success" role="status">
+      {{ downloadMessage() }}
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <section class="loading-panel" aria-live="polite">
+      <span class="spinner spinner-lg"></span>
+      <p>Loading {{ period() }} report…</p>
+    </section>
+  } @else {
+
+    @if (revenue(); as report) {
+
+      <!-- Revenue overview -->
+      <section class="report-section">
+        <div class="section-title-row">
+          <div>
+            <h2 class="section-heading">
+              {{ period() === 'weekly' ? 'Weekly' : 'Monthly' }} Revenue
+            </h2>
+
+            <p class="section-description">
+              GST-exclusive revenue and tax-inclusive invoice totals
+            </p>
+          </div>
+
+          <span class="period-chip">
+            {{ report.from | date:'dd MMM yyyy' }}
+            –
+            {{ report.to | date:'dd MMM yyyy' }}
+          </span>
+        </div>
+
+        <div class="report-cards">
+
+          <article class="report-card highlight">
+            <div class="rc-icon" aria-hidden="true">💰</div>
+            <div class="rc-label">Revenue excl. GST</div>
+            <div class="rc-value">
+              {{ totalRevenue() | currency:'INR':'symbol':'1.2-2' }}
+            </div>
+            <p class="rc-note">Net taxable sales</p>
+          </article>
+
+          <article class="report-card highlight-invoice">
+            <div class="rc-icon" aria-hidden="true">🧾</div>
+            <div class="rc-label">Invoice Value incl. GST</div>
+            <div class="rc-value">
+              {{ totalInvoiceValue() | currency:'INR':'symbol':'1.2-2' }}
+            </div>
+            <p class="rc-note">Total billed amount</p>
+          </article>
+
+          <article class="report-card">
+            <div class="rc-icon" aria-hidden="true">📦</div>
+            <div class="rc-label">Gross Sales</div>
+            <div class="rc-value">
+              {{ grossSales() | currency:'INR':'symbol':'1.2-2' }}
+            </div>
+            <p class="rc-note">Before discounts</p>
+          </article>
+
+          <article class="report-card">
+            <div class="rc-icon" aria-hidden="true">🏷️</div>
+            <div class="rc-label">Discounts</div>
+            <div class="rc-value">
+              {{ totalDiscount() | currency:'INR':'symbol':'1.2-2' }}
+            </div>
+            <p class="rc-note">
+              {{ discountPct() | number:'1.1-1' }}% of gross sales
+            </p>
+          </article>
+
+          <article class="report-card">
+            <div class="rc-icon" aria-hidden="true">🧮</div>
+            <div class="rc-label">Taxable Sales</div>
+            <div class="rc-value">
+              {{ taxableSales() | currency:'INR':'symbol':'1.2-2' }}
+            </div>
+            <p class="rc-note">After discounts, before GST</p>
+          </article>
+
+          <article class="report-card highlight-tax">
+            <div class="rc-icon" aria-hidden="true">📑</div>
+            <div class="rc-label">Total GST</div>
+            <div class="rc-value">
+              {{ totalTax() | currency:'INR':'symbol':'1.2-2' }}
+            </div>
+            <p class="rc-note">Tax recorded on invoices</p>
+          </article>
+
+          <article class="report-card">
+            <div class="rc-icon" aria-hidden="true">🧾</div>
+            <div class="rc-label">Total Orders</div>
+            <div class="rc-value">{{ totalOrders() }}</div>
+            <p class="rc-note">Orders included in this report</p>
+          </article>
+
+          <article class="report-card">
+            <div class="rc-icon" aria-hidden="true">📊</div>
+            <div class="rc-label">Average Invoice</div>
+            <div class="rc-value">
+              {{ averageInvoiceValue() | currency:'INR':'symbol':'1.2-2' }}
+            </div>
+            <p class="rc-note">Invoice value per included order</p>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- Tax breakdown -->
+      <section class="report-section">
+        <div class="section-title-row">
+          <div>
+            <h2 class="section-heading">Revenue &amp; GST Breakdown</h2>
+            <p class="section-description">
+              Composition of the reported invoice value
+            </p>
+          </div>
+        </div>
+
+        <div class="card report-panel">
+          <div class="card-body">
+            <div class="breakdown-bar-wrapper">
+
+              <div class="breakdown-label">
+                <span>Taxable sales</span>
+                <strong>
+                  {{ taxableSales() | currency:'INR':'symbol':'1.2-2' }}
+                </strong>
+              </div>
+
+              <div
+                class="bar-track"
+                role="img"
+                [attr.aria-label]="'Taxable sales make up ' +
+                  (revenueExclTaxPct() | number:'1.0-0') +
+                  ' percent of invoice value'">
+                <div
+                  class="bar-fill"
+                  [style.width.%]="revenueExclTaxPct()">
+                </div>
+              </div>
+
+              <div class="breakdown-label tax-breakdown-label">
+                <span>Total GST</span>
+                <strong>
+                  {{ totalTax() | currency:'INR':'symbol':'1.2-2' }}
+                </strong>
+              </div>
+
+              <div
+                class="bar-track"
+                role="img"
+                [attr.aria-label]="'GST makes up ' +
+                  (taxPct() | number:'1.0-0') +
+                  ' percent of invoice value'">
+                <div
+                  class="bar-fill tax-bar"
+                  [style.width.%]="taxPct()">
+                </div>
+              </div>
+
+              <div class="breakdown-legend">
+                <div class="legend-item">
+                  <span class="legend-dot revenue-dot"></span>
+                  <span>Taxable sales</span>
+                  <strong>{{ revenueExclTaxPct() | number:'1.1-1' }}%</strong>
+                </div>
+
+                <div class="legend-item">
+                  <span class="legend-dot tax-dot"></span>
+                  <span>GST</span>
+                  <strong>{{ taxPct() | number:'1.1-1' }}%</strong>
+                </div>
+              </div>
+
+              <div class="invoice-total-row">
+                <span>Total invoice value</span>
+                <strong>
+                  {{ totalInvoiceValue() | currency:'INR':'symbol':'1.2-2' }}
+                </strong>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- GST components -->
+        <div class="tax-cards">
+          <article class="tax-card">
+            <span class="tax-card-label">CGST</span>
+            <strong>
+              {{ totalCgst() | currency:'INR':'symbol':'1.2-2' }}
+            </strong>
+            <span class="tax-card-note">Central GST</span>
+          </article>
+
+          <article class="tax-card">
+            <span class="tax-card-label">SGST</span>
+            <strong>
+              {{ totalSgst() | currency:'INR':'symbol':'1.2-2' }}
+            </strong>
+            <span class="tax-card-note">State GST</span>
+          </article>
+
+          <article class="tax-card">
+            <span class="tax-card-label">IGST</span>
+            <strong>
+              {{ totalIgst() | currency:'INR':'symbol':'1.2-2' }}
+            </strong>
+            <span class="tax-card-note">Integrated GST</span>
+          </article>
+        </div>
+
+        <p class="report-footnote">
+          GST component totals depend on the tax values returned by the backend.
+          A zero value may mean that the component was not recorded for these orders.
+        </p>
+      </section>
+
+    } @else {
+      <section class="empty-state">
+        <div class="empty-state-icon" aria-hidden="true">📊</div>
+        <h3>No revenue report available</h3>
+        <p>There is no revenue summary to display for this period.</p>
+        <button type="button" class="btn btn-primary" (click)="fetch()">
+          Reload Report
+        </button>
+      </section>
+    }
+
+    <!-- Inventory costs -->
+    @if (invCost(); as inventory) {
+      <section class="report-section">
+        <div class="section-title-row">
+          <div>
+            <h2 class="section-heading">
+              Inventory Cost — {{ period() | titlecase }}
+            </h2>
+            <p class="section-description">
+              Inventory valuation and stock alerts
+            </p>
+          </div>
+        </div>
+
+        <div class="report-cards">
+
+          <article class="report-card highlight-warn">
+            <div class="rc-icon" aria-hidden="true">📦</div>
+            <div class="rc-label">Total Inventory Cost</div>
+            <div class="rc-value">
+              {{ inventoryTotalCost() | currency:'INR':'symbol':'1.2-2' }}
+            </div>
+            <p class="rc-note">Reported inventory cost</p>
+          </article>
+
+          <article class="report-card">
+            <div class="rc-icon" aria-hidden="true">🗃️</div>
+            <div class="rc-label">Total Items</div>
+            <div class="rc-value">{{ inventoryTotalItems() }}</div>
+            <p class="rc-note">Items in the inventory report</p>
+          </article>
+
+          <article
+            class="report-card"
+            [class.warn-card]="lowStockCount() > 0">
+            <div class="rc-icon" aria-hidden="true">⚠️</div>
+            <div class="rc-label">Low Stock Items</div>
+            <div class="rc-value">{{ lowStockCount() }}</div>
+            <p class="rc-note">Items requiring attention</p>
+          </article>
+
+          <article class="report-card">
+            <div class="rc-icon" aria-hidden="true">💡</div>
+            <div class="rc-label">Estimated Gross Margin</div>
+            <div
+              class="rc-value"
+              [class.positive]="grossMarginPct() > 0"
+              [class.negative]="grossMarginPct() < 0">
+              {{ grossMarginPct() | number:'1.1-1' }}%
+            </div>
+            <p class="rc-note">Revenue less reported inventory cost</p>
+          </article>
+
+        </div>
+      </section>
+    }
+
+    <!-- Revenue versus inventory cost -->
+    @if (revenue() && invCost()) {
+      <section class="report-section">
+        <div class="card report-panel">
+          <div class="card-header">
+            <div>
+              <h3>Revenue vs Inventory Cost</h3>
+              <p class="section-description">
+                A comparison of GST-exclusive revenue and reported inventory cost
+              </p>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="vs-bar" aria-label="Revenue versus inventory cost">
+              <div
+                class="vs-revenue"
+                [style.flex]="revenueBarFlex()">
+                <span class="vs-label">
+                  Revenue
+                  {{ totalRevenue() | currency:'INR':'symbol':'1.0-0' }}
+                </span>
+              </div>
+
+              <div
+                class="vs-cost"
+                [style.flex]="costBarFlex()">
+                <span class="vs-label">
+                  Cost
+                  {{ inventoryTotalCost() | currency:'INR':'symbol':'1.0-0' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="margin-display">
+              <div>
+                <span class="margin-title">Estimated gross margin</span>
+                <span class="margin-subtitle">
+                  Revenue − inventory cost
+                </span>
+              </div>
+
+              <strong
+                [class.positive]="grossMarginPct() > 0"
+                [class.negative]="grossMarginPct() < 0">
+                {{ grossMarginPct() | number:'1.1-1' }}%
+              </strong>
+            </div>
+
+            <div class="margin-amount-row">
+              <span>Estimated margin amount</span>
+              <strong
+                [class.positive]="grossMarginAmount() >= 0"
+                [class.negative]="grossMarginAmount() < 0">
+                {{ grossMarginAmount() | currency:'INR':'symbol':'1.2-2' }}
+              </strong>
+            </div>
+
+            <p class="report-footnote">
+              This is an estimate, not a complete profit calculation. It does not
+              necessarily include wages, rent, utilities, payment fees or other
+              operating expenses.
+            </p>
+          </div>
+        </div>
+      </section>
+    }
+
+  }
+
+  <!-- Custom date-range PDF -->
+  <section class="report-section custom-pdf-section">
+    <div class="card report-panel">
+      <div class="card-header">
+        <div>
+          <h3>Custom Revenue PDF</h3>
+          <p class="section-description">
+            Generate a revenue PDF for a specific date range
+          </p>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="custom-date-form">
+
+          <div class="date-field">
+            <label for="reportFromDate">Start date</label>
+            <input
+              id="reportFromDate"
+              type="date"
+              [value]="fromDate()"
+              (change)="fromDate.set($any($event.target).value)"
+              [max]="toDate() || null">
+          </div>
+
+          <div class="date-field">
+            <label for="reportToDate">End date</label>
+            <input
+              id="reportToDate"
+              type="date"
+              [value]="toDate()"
+              (change)="toDate.set($any($event.target).value)"
+              [min]="fromDate() || null">
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-primary custom-download-button"
+            [disabled]="downloading() || !fromDate() || !toDate()"
+            (click)="downloadCustomPdf()">
+            @if (downloading()) {
+              <span class="button-spinner" aria-hidden="true"></span>
+              Preparing PDF…
+            } @else {
+              <span aria-hidden="true">⬇</span>
+              Download Custom PDF
+            }
+          </button>
+
+        </div>
+
+        <p class="report-footnote">
+          The selected start and end dates are included in the report range.
+        </p>
+      </div>
+    </div>
+  </section>
 
 </div>

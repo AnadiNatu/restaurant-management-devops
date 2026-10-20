@@ -41,6 +41,18 @@ public class OrderEntity {
     @Column(name = "discount_amount", precision = 12, scale = 2)
     private BigDecimal discountAmount;
 
+    @Column(name = "cgst_amount", nullable = false, precision = 12, scale = 2)
+    @Builder.Default
+    private BigDecimal cgstAmount = BigDecimal.ZERO;
+
+    @Column(name = "sgst_amount", nullable = false, precision = 12, scale = 2)
+    @Builder.Default
+    private BigDecimal sgstAmount = BigDecimal.ZERO;
+
+    @Column(name = "igst_amount", nullable = false, precision = 12, scale = 2)
+    @Builder.Default
+    private BigDecimal igstAmount = BigDecimal.ZERO;
+
     @Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 

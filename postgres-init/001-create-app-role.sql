@@ -1,0 +1,3 @@
+-- Optional example only. The main application database/user are already created from
+-- POSTGRES_DB and POSTGRES_USER. Add project-specific initialization SQL here if needed.
+-- Keep this file harmless by default; do not duplicate schema objects managed by JPA.

@@ -23,6 +23,8 @@
 .env.prod
 .env.staging
 
+node_modules/
+
 # Allow templates
 !.env.example
 !.env.prod.example

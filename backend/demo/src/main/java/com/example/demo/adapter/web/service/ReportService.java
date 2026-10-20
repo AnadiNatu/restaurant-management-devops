@@ -11,4 +11,9 @@ public interface ReportService {
     ReportDto.InventoryCostSummary getWeeklyInventoryCost();
     ReportDto.InventoryCostSummary getMonthlyInventoryCost();
     ReportDto.DashboardSummary getDashboard();
+
+    // Download revenue report
+    byte[] generateWeeklyRevenuePdf();
+    byte[] generateMonthlyRevenuePdf();
+    byte[] generateRevenuePdf(LocalDateTime from , LocalDateTime to);
 }

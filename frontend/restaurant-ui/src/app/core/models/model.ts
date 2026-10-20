@@ -249,7 +249,14 @@ export interface DashboardSummary {
 
 export interface RevenueSummary {
   totalRevenue: number;
+  grossSales:number;
+  totalDiscount?: number;
+  taxableSales:number;
   totalTax?: number;
+  totalCgst?:number;
+  totalSgst?:number;
+  totalIgst?:number;
+  totalInvoiceValue?:number;
   totalOrders: number;
   from: string;
   to: string;

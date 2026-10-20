@@ -15,6 +15,7 @@ C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\jav
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\dto\OrderDto.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\security\RestaurantUserDetails.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\service\impl\S3ServiceImpl.java
+C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\config\RestaurantTaxProperties.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\persistence\repository\MenuItemRepository.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\controller\SuperAdminController.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\service\impl\ReportServiceImpl.java
@@ -53,6 +54,7 @@ C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\jav
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\dto\InventoryDto.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\service\AuthService.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\service\OrderService.java
+C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\service\impl\RestaurantTaxCalculator.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\service\impl\MenuServiceImpl.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\aspect\PerformanceLoggingAspect.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\domain\port\MenuItemPort.java
@@ -65,6 +67,7 @@ C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\jav
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\controller\ProfileController.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\domain\port\CustomerPort.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\persistence\repository\ActivityLogRepository.java
+C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\config\RevenueReportPdfGenerator.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\web\dto\UserManagementDto.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\domain\model\enums\UserRole.java
 C:\Users\Motorola\Desktop\restaurant-management-devops\backend\demo\src\main\java\com\example\demo\adapter\persistence\mapper\OrderMapper.java

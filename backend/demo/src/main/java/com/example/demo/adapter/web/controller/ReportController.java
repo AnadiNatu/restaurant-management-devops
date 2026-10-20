@@ -50,4 +50,31 @@ public class ReportController {
     public ResponseEntity<ReportDto.InventoryCostSummary> getMonthlyInventoryCost() {
         return ResponseEntity.ok(reportService.getMonthlyInventoryCost());
     }
+
+    @GetMapping(value = "/revenue/weekly/pdf" , produces = "application/pdf")
+    public ResponseEntity<byte[]> downloadWeeklyRevenuePdf(){
+        byte[] pdf = reportService.generateWeeklyRevenuePdf();
+        return ResponseEntity.ok()
+                .header("Content-Disposition" , "attachment; filename=\"weekly-revenue-report.pdf\" ")
+                .header("Cache-Control" , "no-store" )
+                .body(pdf);
+    }
+
+    @GetMapping(value = "/revenue/monthly/pdf" , produces = "application/pdf")
+    public ResponseEntity<byte[]> downloadMonthlyRevenuePdf(){
+        byte[] pdf = reportService.generateMonthlyRevenuePdf();
+        return ResponseEntity.ok()
+                .header("Content-Disposition" , "attachment; filename=\"monthly-revenue-report.pdf\" ")
+                .header("Cache-Control" , "no-store" )
+                .body(pdf);
+    }
+
+    @GetMapping(value = "/revenue/pdf" , produces = "application/pdf")
+    public ResponseEntity<byte[]> downloadRevenuePdf(@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME) LocalDateTime from ,@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME) LocalDateTime to){
+        byte[] pdf = reportService.generateRevenuePdf(from, to);
+        return ResponseEntity.ok()
+                .header("Content-Disposition" , "attachment; filename=\"revenue-report.pdf\"")
+                .header("Cache-Control" , "no-store")
+                .body(pdf);
+    }
 }
