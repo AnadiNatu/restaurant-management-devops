@@ -14,8 +14,7 @@ public class CacheConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager manager = new CaffeineCacheManager(
-                "menuItems", "menuByCategory", "inventoryItems", "customers"
-        );
+                "menuItems", "menuByCategory", "inventoryItems", "customers");
         manager.setCaffeine(
                 Caffeine.newBuilder()
                         .maximumSize(500)

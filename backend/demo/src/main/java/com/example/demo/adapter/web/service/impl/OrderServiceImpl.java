@@ -3,6 +3,7 @@ package com.example.demo.adapter.web.service.impl;
 
 import com.example.demo.adapter.web.dto.OrderDto;
 import com.example.demo.adapter.web.service.OrderService;
+import com.example.demo.config.RestaurantTaxProperties;
 import com.example.demo.domain.model.MenuItem;
 import com.example.demo.domain.model.Order;
 import com.example.demo.domain.model.OrderItem;
@@ -36,6 +37,8 @@ public class OrderServiceImpl implements OrderService {
     private final MenuItemPort menuItemPort;
     private final CustomerPort customerPort;
     private final EmailService emailService;
+    private final RestaurantTaxCalculator taxCalculator;
+    private final RestaurantTaxProperties taxProperties;
 
 
     @Override
@@ -94,7 +97,14 @@ public class OrderServiceImpl implements OrderService {
 
                     BigDecimal taxRate = menuItem.getTaxRate() != null
                             ? menuItem.getTaxRate()
-                            : BigDecimal.ZERO;
+                            : taxProperties.getDefaultRate();
+
+                    if (taxRate == null || taxRate.signum() < 0) {
+                        throw new InvalidOperationException(
+                                "createOrder",
+                                "Tax rate must be configured and non-negative"
+                        );
+                    }
 
                     BigDecimal unitPrice = menuItem.getPrice();
                     if (unitPrice == null || unitPrice.signum() < 0) {
@@ -188,16 +198,29 @@ public class OrderServiceImpl implements OrderService {
             BigDecimal lineTaxable = lineSubtotal.subtract(lineDiscount)
                     .setScale(2, RoundingMode.HALF_UP);
 
-            BigDecimal lineTax = lineTaxable
-                    .multiply(item.getTaxRate())
-                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+//            BigDecimal lineTax = lineTaxable
+//                    .multiply(item.getTaxRate())
+//                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+//
+//            // SAME-STATE SUPPLY ASSUMPTION:
+//            // Split each line's GST into CGST and SGST.
+//            // Assign rounding remainder to SGST.
+//            BigDecimal lineCgst = lineTax
+//                    .divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
+//            BigDecimal lineSgst = lineTax.subtract(lineCgst);
 
-            // SAME-STATE SUPPLY ASSUMPTION:
-            // Split each line's GST into CGST and SGST.
-            // Assign rounding remainder to SGST.
-            BigDecimal lineCgst = lineTax
-                    .divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
-            BigDecimal lineSgst = lineTax.subtract(lineCgst);
+            RestaurantTaxCalculator.TaxBreakdown breakdown =
+                    taxCalculator.calculate(lineSubtotal, lineDiscount, item.getTaxRate(), true);
+
+            BigDecimal lineTax = breakdown.getTotalTax();
+            BigDecimal lineCgst = breakdown.getCgst();
+            BigDecimal lineSgst = breakdown.getSgst();
+            BigDecimal lineIgst = breakdown.getIgst();
+
+            taxAmount = taxAmount.add(lineTax);
+            cgstAmount = cgstAmount.add(lineCgst);
+            sgstAmount = sgstAmount.add(lineSgst);
+            igstAmount = igstAmount.add(lineIgst);
 
             cgstAmount = cgstAmount.add(lineCgst);
             sgstAmount = sgstAmount.add(lineSgst);
@@ -232,14 +255,11 @@ public class OrderServiceImpl implements OrderService {
         order.setCgstAmount(cgstAmount);
         order.setSgstAmount(sgstAmount);
         order.setIgstAmount(igstAmount);
-        order.setTotalAmount(total);
+        order.setTotalAmount(subtotal.subtract(discount).add(taxAmount).setScale(2, RoundingMode.HALF_UP));
 
         Order saved = orderPort.save(order);
 
-        log.info(
-                "[ORDER] Created | id={} | subtotal={} | discount={} "
-                        + "| tax={} | CGST={} | SGST={} | IGST={} "
-                        + "| total={} | by={}",
+        log.info("[ORDER] Created | id={} | subtotal={} | discount={} " + "| tax={} | CGST={} | SGST={} | IGST={} " + "| total={} | by={}",
                 saved.getId(),
                 saved.getSubtotal(),
                 saved.getDiscountAmount(),
@@ -248,8 +268,7 @@ public class OrderServiceImpl implements OrderService {
                 saved.getSgstAmount(),
                 saved.getIgstAmount(),
                 saved.getTotalAmount(),
-                handledBy
-        );
+                handledBy);
 
         return toResponse(saved);
     }

@@ -13,8 +13,8 @@ import {
 } from '../models/model';
 import { environment } from '../../../environments/environment';
 
-const API = 'http://localhost:8080/api';
-// const API = `${environment.apiBaseUrl}/api`;
+// const API = 'http://localhost:8080/api';
+const API = `${environment.apiBaseUrl}/api`;
 
 // ── Menu Service ──────────────────────────────────────────────────────────────
 
