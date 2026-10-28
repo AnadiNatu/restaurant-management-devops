@@ -11,7 +11,7 @@ import {
   ActivityLog,
   InventoryCostSummary
 } from '../models/model';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.production';
 
 // const API = 'http://localhost:8080/api';
 const API = `${environment.apiBaseUrl}/api`;
