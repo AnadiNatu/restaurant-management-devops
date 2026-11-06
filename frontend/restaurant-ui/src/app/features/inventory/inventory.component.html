@@ -373,6 +373,12 @@
                         <button class="btn btn-ghost btn-sm" title="Edit" (click)="openEdit(item)">✏️</button>
                         <button class="btn btn-success btn-sm" title="Restock" (click)="openRestock(item)">+ Restock</button>
                         <button class="btn btn-danger btn-sm" title="Delete" (click)="confirmDelete(item)">🗑</button>
+                        <button type="button"class="btn btn-warning btn-sm"(click)="openConsume(item)">
+                          <i class="bi bi-box-arrow-down"></i>Consume
+                        </button>
+                        <button type="button"class="btn btn-info btn-sm"(click)="openTransactions(item)">
+                          <i class="bi bi-clock-history"></i>History
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -450,28 +456,231 @@
             </div>
  
             <form [formGroup]="restockForm" (ngSubmit)="doRestock()">
+
+  <div class="mb-3">
+    <label class="form-label">Quantity to add</label>
+
+    <input
+      type="number"
+      class="form-control"
+      formControlName="quantity"
+      min="0.001"
+      step="0.001">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Purchase unit cost</label>
+
+    <input
+      type="number"
+      class="form-control"
+      formControlName="unitCost"
+      min="0"
+      step="0.01">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Supplier</label>
+
+    <input
+      type="text"
+      class="form-control"
+      formControlName="supplier">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Notes</label>
+
+    <textarea
+      class="form-control"
+      formControlName="notes">
+    </textarea>
+  </div>
+
+  <button
+    type="submit"
+    class="btn btn-primary"
+    [disabled]="saving()">
+    Restock Inventory
+  </button>
+
+</form>
+          </div>
+        </div>
+      }
+
+      <!-- Consume Inventory Modal -->
+      @if (modalMode() === 'consume' && consumeTarget(); as item) {
+        <div class="modal-backdrop" (click)="closeModal()">
+          <div class="modal inventory-action-modal" (click)="$event.stopPropagation()">
+
+            <div class="modal-header">
+              <div>
+                <h2>Consume Inventory</h2>
+                <p class="inventory-modal-subtitle">Record stock used from your inventory.</p>
+              </div>
+              <button
+                type="button"
+                class="btn btn-ghost btn-icon"
+                aria-label="Close"
+                (click)="closeModal()">✕</button>
+            </div>
+
+            <!-- Selected inventory item -->
+            <div class="inventory-item-summary">
+              <div class="inventory-item-summary-main">
+                <span class="inventory-summary-label">ITEM BEING CONSUMED</span>
+                <h3>{{ item.name }}</h3>
+                @if (item.category) {
+                  <span class="cat-chip">{{ item.category }}</span>
+                }
+              </div>
+              <div class="inventory-summary-stats">
+                <div>
+                  <span>Available stock</span>
+                  <strong>{{ item.quantity | number:'1.2-3' }} {{ item.unit }}</strong>
+                </div>
+                <div>
+                  <span>Average unit cost</span>
+                  <strong>{{ item.costPerUnit | currency:'INR' }}</strong>
+                </div>
+              </div>
+            </div>
+
+            <form [formGroup]="consumeForm" (ngSubmit)="doConsume()">
               <div class="form-group">
-                <label class="form-label">Current: {{ restockTarget()!.quantity }} {{ restockTarget()!.unit }}</label>
-                <label class="form-label" style="margin-top:0.75rem">Add Quantity *</label>
-                <input class="form-control" type="number" formControlName="quantity" min="0.001" step="0.001" />
+                <label class="form-label" for="consumeQuantity">Quantity to consume</label>
+                <input
+                  id="consumeQuantity"
+                  type="number"
+                  class="form-control"
+                  formControlName="quantity"
+                  min="0.001"
+                  [max]="item.quantity"
+                  step="0.001"
+                  placeholder="Enter quantity">
+                <small class="inventory-field-hint">
+                  Maximum available: {{ item.quantity | number:'1.2-3' }} {{ item.unit }}
+                </small>
               </div>
-              <div class="form-group" style="margin-top:0.75rem">
-                <label class="form-label">Supplier (optional)</label>
-                <input class="form-control" formControlName="supplier" />
+
+              <div class="form-group inventory-notes-group">
+                <label class="form-label" for="consumeNotes">Consumption notes</label>
+                <textarea
+                  id="consumeNotes"
+                  class="form-control"
+                  formControlName="notes"
+                  rows="3"
+                  placeholder="Reason for consumption"></textarea>
               </div>
- 
-              <div class="modal-footer">
-                <button type="button" class="btn btn-ghost" (click)="closeModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary" [disabled]="saving()">
+
+              <div class="modal-footer inventory-modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-ghost"
+                  (click)="closeModal()">
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  [disabled]="saving()">
                   @if (saving()) { <span class="spinner"></span> }
-                  Restock
+                  {{ saving() ? 'Recording...' : 'Record Consumption' }}
                 </button>
               </div>
             </form>
           </div>
         </div>
       }
- 
+
+      <!-- Inventory Transaction History Modal -->
+      @if (modalMode() === 'transactions' && transactionTarget(); as item) {
+        <div class="modal-backdrop" (click)="closeModal()">
+          <div class="modal inventory-history-modal" (click)="$event.stopPropagation()">
+
+            <div class="modal-header">
+              <div>
+                <h2>Inventory Transaction History</h2>
+                <p class="inventory-modal-subtitle">Review stock movements and their recorded costs.</p>
+              </div>
+              <button
+                type="button"
+                class="btn btn-ghost btn-icon"
+                aria-label="Close"
+                (click)="closeModal()">✕</button>
+            </div>
+
+            <div class="inventory-item-summary inventory-history-summary">
+              <div class="inventory-item-summary-main">
+                <span class="inventory-summary-label">INVENTORY ITEM</span>
+                <h3>{{ item.name }}</h3>
+              </div>
+              <div class="inventory-summary-stats">
+                <div>
+                  <span>Current stock</span>
+                  <strong>{{ item.quantity | number:'1.2-3' }} {{ item.unit }}</strong>
+                </div>
+                <div>
+                  <span>Average unit cost</span>
+                  <strong>{{ item.costPerUnit | currency:'INR' }}</strong>
+                </div>
+              </div>
+            </div>
+
+            @if (transactionsLoading()) {
+              <div class="inventory-history-state">
+                <span class="spinner spinner-lg"></span>
+                <p>Loading transaction history...</p>
+              </div>
+            } @else if ((transactions()?.length ?? 0) === 0) {
+              <div class="inventory-history-state">
+                <p>No transactions found for this inventory item.</p>
+              </div>
+            } @else {
+              <div class="table-responsive inventory-history-table-wrapper">
+                <table class="table table-striped inventory-history-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Type</th>
+                      <th>Quantity</th>
+                      <th>Unit Cost</th>
+                      <th>Total Cost</th>
+                      <th>Stock After</th>
+                      <th>Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (transaction of transactions() ?? []; track transaction.id) {
+                      <tr>
+                        <td>{{ transaction.createdAt | date:'medium' }}</td>
+                        <td>
+                          <span
+                            class="badge"
+                            [ngClass]="'text-bg-' + getTransactionColor(transaction.transactionType)">
+                            {{ formatTransactionType(transaction.transactionType) }}
+                          </span>
+                        </td>
+                        <td>{{ transaction.quantity | number:'1.2-3' }}</td>
+                        <td>{{ transaction.unitCost | currency:'INR' }}</td>
+                        <td>{{ transaction.totalCost | currency:'INR' }}</td>
+                        <td>{{ transaction.quantityAfter ?? '—' }}</td>
+                        <td>{{ transaction.notes || '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+
+            <div class="modal-footer inventory-modal-footer">
+              <button type="button" class="btn btn-ghost" (click)="closeModal()">Close</button>
+            </div>
+          </div>
+        </div>
+      }
+
       <!-- Delete Confirm -->
       @if (deleteTarget()) {
         <div class="modal-backdrop" (click)="deleteTarget.set(null)">

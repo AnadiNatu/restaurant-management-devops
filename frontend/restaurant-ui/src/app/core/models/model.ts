@@ -123,11 +123,40 @@ export interface CreateInventoryRequest {
   supplier?: string;
 }
 
-export interface UpdateInventoryRequest extends Partial<CreateInventoryRequest> {}
+// export interface UpdateInventoryRequest extends Partial<CreateInventoryRequest> {}
+export interface UpdateInventoryRequest {
+  name?: string;
+  unit?: string;
+  minThreshold?: number;
+  category?: string;
+  supplier?: string;
+}
 
 export interface RestockRequest {
   quantity: number;
   supplier?: string;
+  unitCost?: number;
+  notes?: string;
+}
+
+export interface ConsumeRequest {
+  quantity: number;
+  notes: string;
+}
+
+export interface InventoryTransactionResponse {
+  id: number;
+  inventoryItemId: number;
+  transactionType: | 'OPENING_BALANCE' | 'PURCHASE' | 'RESTOCK' | 
+  'COMSUMPTION' | 'ADJUSTMENT' | string;
+  quantity: number;
+  unitCost: number;
+  totalCost: number;
+  quantityBefore?: number;
+  quantityAfter?: number;
+  notes?: string;
+  createdBy?: string;
+  createdAt?: string;
 }
 
 export interface CostSummaryResponse {

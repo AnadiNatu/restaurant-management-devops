@@ -9,9 +9,11 @@ import {
   UserResponse, CreateUserRequest, UpdateUserRequest, UpdateRoleRequest, UserRole,
   DashboardSummary, RevenueSummary,
   ActivityLog,
-  InventoryCostSummary
+  InventoryCostSummary, ConsumeRequest,
+  InventoryTransactionResponse
 } from '../models/model';
 import { environment } from '../../../environments/environment.production';
+// import { environment } from '../../../environments/environment';
 
 // const API = 'http://localhost:8080/api';
 const API = `${environment.apiBaseUrl}/api`;
@@ -59,7 +61,10 @@ export class InventoryService {
   getMonthlyCost(): Observable<CostSummaryResponse> { return this.http.get<CostSummaryResponse>(`${this.BASE}/cost/monthly`); }
 
   getCostBetween(from: string, to: string): Observable<CostSummaryResponse> {
-    const params = {from, to};
+    const params = new HttpParams()
+      .set('from', from)
+      .set('to', to);
+
     return this.http.get<CostSummaryResponse>(`${this.BASE}/between`, { params });
   }
 
@@ -74,6 +79,16 @@ export class InventoryService {
   restock(id: number, req: RestockRequest): Observable<InventoryResponse> {
     return this.http.patch<InventoryResponse>(`${this.BASE}/${id}/restock`, req);
   }
+
+  consume(id : number , request : ConsumeRequest) : Observable<InventoryResponse> {
+    return this.http.post<InventoryResponse>(`${this.BASE}/${id}/consume` , request);
+  }
+
+  getTransactions(id : number):Observable<InventoryTransactionResponse[]> {
+    return this.http.get<InventoryTransactionResponse[]>(`${this.BASE}/${id}/transactions`);
+  }
+
+
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.BASE}/${id}`);

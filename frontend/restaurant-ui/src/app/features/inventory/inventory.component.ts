@@ -1,11 +1,11 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CostSummaryResponse, InventoryResponse } from '../../core/models/model';
+import { ConsumeRequest, CostSummaryResponse, InventoryResponse, InventoryTransactionResponse, RestockRequest, UpdateInventoryRequest } from '../../core/models/model';
 import { InventoryService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
 import { CommonModule } from '@angular/common';
 
-type ModalMode = 'create' | 'edit' | 'restock' | null;
+type ModalMode = 'create' | 'edit' | 'restock' | 'consume' | 'transactions' |null;
 
 interface CostSummaryEntry {
   key: string;
@@ -35,6 +35,11 @@ export class InventoryComponent implements OnInit {
   catFilter     = signal('');
   showLowOnly   = signal(false);
 
+  consumeTarget = signal<InventoryResponse | null>(null);
+  transactionTarget = signal<InventoryResponse | null>(null);
+  transactions = signal<InventoryTransactionResponse[] | null>(null);
+  transactionsLoading = signal(false);
+
   lowStockApiItems = signal<InventoryResponse[] | null>(null);
 weeklyCost = signal<CostSummaryResponse | null>(null);
 monthlyCost = signal<CostSummaryResponse | null>(null);
@@ -63,9 +68,17 @@ apiLoading = signal(false);
   });
  
   restockForm = this.fb.group({
-    quantity: [null as number | null, [Validators.required, Validators.min(0.001)]],
-    supplier: ['']
-  });
+  quantity: [null as number | null,[Validators.required, Validators.min(0.001)]],
+  unitCost: [null as number | null,[Validators.required, Validators.min(0)]],
+  supplier: [''],
+  notes: ['']
+});
+
+consumeForm = this.fb.group({
+  quantity: [null as number | null,[Validators.required, Validators.min(0.001)]],
+  notes: ['',[Validators.required, Validators.minLength(3)]]
+});
+
  
   ngOnInit(): void { this.load(); }
  
@@ -77,62 +90,199 @@ apiLoading = signal(false);
   }
  
   openCreate(): void {
-    this.editingItem.set(null);
-    this.itemForm.reset();
-    this.modalMode.set('create');
-  }
+
+  this.editingItem.set(null);
+
+  this.itemForm.reset();
+
+  this.itemForm.controls.quantity.enable();
+  this.itemForm.controls.costPerUnit.enable();
+
+  this.modalMode.set('create');
+}
  
   openEdit(item: InventoryResponse): void {
-    this.editingItem.set(item);
-    this.itemForm.patchValue({ name: item.name, unit: item.unit, quantity: item.quantity, minThreshold: item.minThreshold, costPerUnit: item.costPerUnit, category: item.category || '', supplier: item.supplier || '' });
-    this.modalMode.set('edit');
-  }
+
+  this.editingItem.set(item);
+
+  this.itemForm.patchValue({
+    name: item.name,
+    unit: item.unit,
+    quantity: item.quantity,
+    minThreshold: item.minThreshold,
+    costPerUnit: item.costPerUnit,
+    category: item.category || '',
+    supplier: item.supplier || ''
+  });
+
+  // Stock and cost must be changed through transactions.
+  this.itemForm.controls.quantity.disable();
+  this.itemForm.controls.costPerUnit.disable();
+
+  this.modalMode.set('edit');
+}
  
   openRestock(item: InventoryResponse): void {
-    this.restockTarget.set(item);
-    this.restockForm.reset();
-    this.modalMode.set('restock');
-  }
+
+  this.restockTarget.set(item);
+
+  this.restockForm.reset();
+
+  this.restockForm.patchValue({
+    unitCost: item.costPerUnit
+  });
+
+  this.modalMode.set('restock');
+}
  
-  closeModal(): void { this.modalMode.set(null); }
- 
+  closeModal(): void {
+
+  this.modalMode.set(null);
+
+  this.itemForm.controls.quantity.enable();
+  this.itemForm.controls.costPerUnit.enable();
+
+  this.editingItem.set(null);
+  this.restockTarget.set(null);
+  this.consumeTarget.set(null);
+  this.transactionTarget.set(null);
+}
+
   saveItem(): void {
-    if (this.itemForm.invalid) { this.itemForm.markAllAsTouched(); return; }
-    this.saving.set(true);
-    const val = this.itemForm.getRawValue() as any;
-    const editing = this.editingItem();
- 
-    const obs$ = editing
-      ? this.invSvc.update(editing.id, val)
-      : this.invSvc.create(val);
- 
-    obs$.subscribe({
+
+  if (this.itemForm.invalid) {
+    this.itemForm.markAllAsTouched();
+    return;
+  }
+
+  this.saving.set(true);
+
+  const editing = this.editingItem();
+
+  if (editing) {
+
+    const val = this.itemForm.getRawValue();
+
+    const request: UpdateInventoryRequest = {
+      name: val.name ?? undefined,
+      unit: val.unit ?? undefined,
+      minThreshold: val.minThreshold ?? undefined,
+      category: val.category || undefined,
+      supplier: val.supplier || undefined
+    };
+
+    this.invSvc.update(editing.id, request).subscribe({
       next: saved => {
-        if (editing) this.items.update(l => l.map(i => i.id === saved.id ? saved : i));
-        else         this.items.update(l => [saved, ...l]);
-        this.toast.success(editing ? 'Item updated.' : 'Item created.');
+        this.items.update(list =>
+          list.map(item =>item.id === saved.id ? saved : item));
+        this.toast.success('Inventory item updated.');
         this.closeModal();
         this.saving.set(false);
       },
-      error: () => this.saving.set(false)
+
+      error: () => {
+        this.saving.set(false);
+        this.toast.error('Unable to update inventory item.');
+      }
+    });
+
+  } else {
+    const val = this.itemForm.getRawValue();
+
+    const request = {
+      name: val.name!,
+      unit: val.unit!,
+      quantity: val.quantity!,
+      minThreshold: val.minThreshold!,
+      costPerUnit: val.costPerUnit!,
+      category: val.category || undefined,
+      supplier: val.supplier || undefined
+    };
+
+    this.invSvc.create(request).subscribe({
+
+      next: saved => {
+        this.items.update(list => [saved, ...list]);
+        this.toast.success('Inventory item created.');
+        this.closeModal();
+        this.saving.set(false);
+      },
+
+      error: () => {
+        this.saving.set(false);
+        this.toast.error('Unable to create inventory item.');
+      }
     });
   }
+}
+
+openTransactions(item: InventoryResponse): void {
+
+  this.transactionTarget.set(item);
+
+  this.transactions.set([]);
+
+  this.transactionsLoading.set(true);
+
+  this.modalMode.set('transactions');
+
+  this.invSvc.getTransactions(item.id).subscribe({
+
+    next: result => {
+
+      this.transactions.set(result);
+
+      this.transactionsLoading.set(false);
+    },
+
+    error: () => {
+
+      this.transactionsLoading.set(false);
+
+      this.toast.error(
+        'Unable to load inventory transaction history.'
+      );
+    }
+  });
+}
  
   doRestock(): void {
-    if (this.restockForm.invalid) { this.restockForm.markAllAsTouched(); return; }
-    const target = this.restockTarget();
-    if (!target) return;
-    this.saving.set(true);
-    this.invSvc.restock(target.id, this.restockForm.getRawValue() as any).subscribe({
-      next: saved => {
-        this.items.update(l => l.map(i => i.id === saved.id ? saved : i));
-        this.toast.success(`${saved.name} restocked.`);
-        this.closeModal();
-        this.saving.set(false);
-      },
-      error: () => this.saving.set(false)
-    });
+
+  if (this.restockForm.invalid) {
+    this.restockForm.markAllAsTouched();
+    return;
   }
+
+  const target = this.restockTarget();
+  if (!target) return;
+  this.saving.set(true);
+  const val = this.restockForm.getRawValue();
+
+  const request: RestockRequest = {
+    quantity: val.quantity!,
+    unitCost: val.unitCost!,
+    supplier: val.supplier || undefined,
+    notes: val.notes || undefined
+  };
+
+  this.invSvc.restock(target.id, request).subscribe({
+
+    next: saved => {
+
+      this.items.update(list =>
+        list.map(item =>item.id === saved.id ? saved : item));
+
+      this.toast.success(`${saved.name} restocked successfully.`);
+
+      this.closeModal();
+      this.saving.set(false);
+    },
+    error: () => {
+      this.saving.set(false);
+      this.toast.error('Unable to restock inventory.');
+    }
+  });
+}
  
   confirmDelete(item: InventoryResponse): void { this.deleteTarget.set(item); }
  
@@ -194,13 +344,87 @@ getCostEntries(summary: CostSummaryResponse | null): CostSummaryEntry[] {
 
   return Object.entries(summary)
     .filter(([, value]) => value !== undefined && value !== null)
-    .map(([key, value]) => ({
-      key,
-      value
-    }));
+    .map(([key, value]) => ({key,value}
+  ));
 
 }
 
+openConsume(item: InventoryResponse): void {
+  this.consumeTarget.set(item);
+  this.consumeForm.reset();
+  this.modalMode.set('consume');
+}
+
+
+doConsume(): void {
+
+  if (this.consumeForm.invalid) {
+    this.consumeForm.markAllAsTouched();
+    return;
+  }
+
+  const target = this.consumeTarget();
+  if (!target) return;
+  const val = this.consumeForm.getRawValue();
+  if (val.quantity! > target.quantity) {
+    this.toast.error(
+      `Insufficient stock. Available: ${target.quantity} ${target.unit}`
+    );
+    return;
+  }
+
+  this.saving.set(true);
+
+  const request: ConsumeRequest = {
+    quantity: val.quantity!,
+    notes: val.notes!
+  };
+
+  this.invSvc.consume(target.id, request).subscribe({
+
+    next: saved => {
+      this.items.update(list =>
+        list.map(item =>item.id === saved.id ? saved : item));
+
+      this.toast.success(`${request.quantity} ${saved.unit} of ${saved.name} consumed successfully.`);
+      this.closeModal();
+      this.saving.set(false);
+    },
+
+    error: () => {
+      this.saving.set(false);
+      this.toast.error('Unable to record consumption. Please check available stock.');
+    }
+  });
+}
+
+formatTransactionType(type: string): string {
+
+  return type
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+getTransactionColor(type: string): string {
+
+  switch (type) {
+
+    case 'OPENING_BALANCE':
+    case 'PURCHASE':
+    case 'RESTOCK':
+      return 'success';
+
+    case 'CONSUMPTION':
+      return 'warning';
+
+    case 'ADJUSTMENT':
+      return 'info';
+
+    default:
+      return 'secondary';
+  }
+}
 }
 
 // Make use of "getLowStock(): Observable<InventoryResponse[]>" , 
