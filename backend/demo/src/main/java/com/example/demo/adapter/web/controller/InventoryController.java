@@ -118,4 +118,37 @@ public class InventoryController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{id}/consume")
+    public ResponseEntity<InventoryDto.Response> consume(
+            @PathVariable Long id,
+            @Valid @RequestBody InventoryDto.ConsumeRequest request,
+            @AuthenticationPrincipal RestaurantUserDetails principal,
+            HttpServletRequest httpRequest
+    ) {
+        String actor = principal.getUsername();
+
+        InventoryDto.Response response =
+                inventoryService.consume(id, request, actor);
+
+        activityLogService.log(
+                actor,
+                principal.getUser().getRole(),
+                "CONSUME_INVENTORY",
+                "INVENTORY",
+                String.valueOf(id),
+                "Consumed " + request.getQuantity()
+                        + " units of inventory item " + response.getName(),
+                httpRequest
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/transactions")
+    public ResponseEntity<List<InventoryDto.TransactionResponse>> getTransactions(
+            @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(inventoryService.getTransactions(id));
+    }
+
 }

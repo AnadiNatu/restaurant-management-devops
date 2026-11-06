@@ -14,4 +14,5 @@ public interface InventoryPort {
     List<InventoryItem> findLowStock();
     BigDecimal getTotalCostBetween(LocalDateTime from, LocalDateTime to);
     void deleteById(Long id);
+    Optional<InventoryItem> findByIdForUpdate(Long id);
 }

@@ -31,12 +31,12 @@ public class InventoryDto {
     public static class UpdateRequest {
         private String name;
         private String unit;
-        @DecimalMin("0.0")
-        private BigDecimal quantity;
+//        @DecimalMin("0.0")
+//        private BigDecimal quantity;
         @DecimalMin("0.0")
         private BigDecimal minThreshold;
-        @DecimalMin("0.01")
-        private BigDecimal costPerUnit;
+//        @DecimalMin("0.01")
+//        private BigDecimal costPerUnit;
         private String category;
         private String supplier;
     }
@@ -47,7 +47,22 @@ public class InventoryDto {
         @DecimalMin("0.01")
         private BigDecimal quantity;
 
+        @NotNull
+        @DecimalMin("0.00")
+        private BigDecimal unitCost;
+
         private String supplier;
+        private String notes;
+    }
+
+    @Data
+    public static class ConsumeRequest {
+        @NotNull
+        @DecimalMin("0.001")
+        private BigDecimal quantity;
+
+        @NotBlank
+        private String notes;
     }
 
     @Data
@@ -75,5 +90,21 @@ public class InventoryDto {
         private LocalDateTime from;
         private LocalDateTime to;
         private String period;
+    }
+
+    @Data
+    public static class TransactionResponse {
+        private Long id;
+        private Long inventoryItemId;
+        private String transactionType;
+        private BigDecimal quantity;
+        private BigDecimal unitCost;
+        private BigDecimal totalCost;
+        private BigDecimal quantityBefore;
+        private BigDecimal quantityAfter;
+        private Long referenceOrderId;
+        private String notes;
+        private String createdBy;
+        private LocalDateTime createdAt;
     }
 }

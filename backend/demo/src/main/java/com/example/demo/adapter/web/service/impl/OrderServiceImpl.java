@@ -222,9 +222,9 @@ public class OrderServiceImpl implements OrderService {
             sgstAmount = sgstAmount.add(lineSgst);
             igstAmount = igstAmount.add(lineIgst);
 
-            cgstAmount = cgstAmount.add(lineCgst);
-            sgstAmount = sgstAmount.add(lineSgst);
-            taxAmount = taxAmount.add(lineTax);
+//            cgstAmount = cgstAmount.add(lineCgst);
+//            sgstAmount = sgstAmount.add(lineSgst);
+//            taxAmount = taxAmount.add(lineTax);
         }
 
         taxAmount = taxAmount.setScale(2, RoundingMode.HALF_UP);

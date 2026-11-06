@@ -2,7 +2,9 @@ package com.example.demo.adapter.persistence;
 
 import com.example.demo.adapter.persistence.mapper.InventoryMapper;
 import com.example.demo.adapter.persistence.repository.InventoryRepository;
+import com.example.demo.adapter.persistence.repository.InventoryTransactionRepository;
 import com.example.demo.domain.model.InventoryItem;
+import com.example.demo.domain.model.enums.InventoryTransactionType;
 import com.example.demo.domain.port.InventoryPort;
 import com.example.demo.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class InventoryPortAdapter implements InventoryPort {
 
     private final InventoryRepository repository;
+    private final InventoryTransactionRepository transactionRepository;
     private final InventoryMapper mapper;
 
     @Override
@@ -43,7 +46,16 @@ public class InventoryPortAdapter implements InventoryPort {
 
     @Override
     public BigDecimal getTotalCostBetween(LocalDateTime from, LocalDateTime to) {
-        return repository.getTotalCostBetween(from, to);
+        return transactionRepository.sumCostByTypeBetween(
+                InventoryTransactionType.CONSUMPTION,
+                from,
+                to
+        );
+    }
+
+    @Override
+    public Optional<InventoryItem> findByIdForUpdate(Long id) {
+        return repository.findByIdForUpdate(id).map(mapper::toDomain);
     }
 
     @Override

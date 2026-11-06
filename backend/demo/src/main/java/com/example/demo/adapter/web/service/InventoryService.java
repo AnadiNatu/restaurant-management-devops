@@ -16,4 +16,6 @@ public interface InventoryService {
     InventoryDto.CostSummaryResponse getMonthlyCost();
     InventoryDto.CostSummaryResponse getCostBetween(LocalDateTime from, LocalDateTime to);
     void delete(Long id);
+    InventoryDto.Response consume(Long id, InventoryDto.ConsumeRequest request, String consumedBy);
+    List<InventoryDto.TransactionResponse> getTransactions(Long id);
 }

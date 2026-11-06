@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -62,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/menu/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
 
                         // ── Inventory (Admin & Super Admin write; Employee read) ──
-                        .requestMatchers("GET", "/api/inventory/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET ,"/api/inventory/**").hasAnyRole("SUPER_ADMIN", "ADMIN", "EMPLOYEE")
                         .requestMatchers("/api/inventory/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
 
                         // ── Orders (all roles can create/view; admin can cancel/override) ──
