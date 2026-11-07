@@ -20,8 +20,14 @@ RUN npm ci
 COPY . .
 
 # Production build
-RUN npm run build -- --configuration production
+# RUN npm run build -- --configuration production
 
+# Fix Angular CLI executable permissions
+RUN chmod +x node_modules/.bin/ng \
+    && chmod +x node_modules/@angular/cli/bin/ng.js
+
+# Production build
+RUN ./node_modules/.bin/ng build --configuration production
 
 # ----------------------------------------------------------
 # NGINX STAGE
